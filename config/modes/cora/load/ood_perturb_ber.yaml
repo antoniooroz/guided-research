@@ -1,0 +1,9 @@
+custom_name: ood_perturb_ber load
+
+# Load classification model
+load: classification
+skip_training: true
+
+# OOD Perturb Ber settings
+ood: perturb
+perturb_mode: bernoulli_p_calculated

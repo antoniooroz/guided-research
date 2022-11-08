@@ -1,0 +1,14 @@
+model:
+  type: MIXED_PPNP
+  samples_training: 3
+  initial_var: 1
+  guide_init_scale: 0.1
+  uncertainty: variance_between_samples_per_class_summed
+  train_mean: True
+  train_var: True
+training:
+  learning_rate: 
+    TRAINING: 0.03
+  reg_lambda: 
+    TRAINING: 0.0005
+  drop_prob: 0

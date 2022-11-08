@@ -1,0 +1,9 @@
+custom_name: ood_loc load
+
+load: ood_loc
+skip_training: True
+
+# OOD LOC Settings
+ood: loc
+loc_remove_edges: False
+ood_eval_during_training: False

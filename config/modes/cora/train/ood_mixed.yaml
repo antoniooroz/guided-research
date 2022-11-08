@@ -1,0 +1,8 @@
+custom_name: ood_mixed
+experiment:
+  dataset: CORA_ML
+  ood: LOC
+  ood_loc_remove_edges: True
+  ood_loc_frac: 0.3
+training:
+  ood_eval_during_training: False

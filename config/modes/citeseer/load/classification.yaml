@@ -1,0 +1,5 @@
+custom_name: classification citeseer load
+dataset: citeseer
+
+load: classification citeseer
+skip_training: True

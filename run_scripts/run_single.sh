@@ -1,0 +1,1 @@
+python run.py --config "/config/models/p_ppnp.yaml" "/config/modes/cora/train/classification.yaml"

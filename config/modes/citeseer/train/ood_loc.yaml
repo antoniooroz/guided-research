@@ -1,0 +1,7 @@
+custom_name: ood_loc citeseer
+dataset: citeseer
+
+# OOD LOC Settings
+ood: loc
+loc_remove_edges: True
+ood_eval_during_training: False

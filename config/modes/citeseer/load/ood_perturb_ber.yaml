@@ -1,0 +1,10 @@
+custom_name: ood_perturb_ber citeseer load
+dataset: citeseer
+
+# Load classification model
+load: classification citeseer
+skip_training: true
+
+# OOD Perturb Ber settings
+ood: perturb
+perturb_mode: bernoulli_p_calculated

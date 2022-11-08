@@ -1,0 +1,9 @@
+model:
+  type: PPNP
+training:
+  learning_rate: 
+    TRAINING: 0.1
+  reg_lambda: 
+    TRAINING: 0.0
+  drop_prob: 0.5
+

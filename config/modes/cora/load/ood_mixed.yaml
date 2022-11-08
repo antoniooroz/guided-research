@@ -1,0 +1,14 @@
+custom_name: ood_mixed load
+
+load: ood_mixed
+skip_training: true
+
+# OOD LOC Settings
+ood: mixed
+
+loc_remove_edges: False
+ood_eval_during_training: False
+loc_frac: 0.3
+
+perturb_mode: bernoulli_p_calculated
+perturb_budget: 0.1

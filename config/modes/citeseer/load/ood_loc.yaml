@@ -1,0 +1,10 @@
+custom_name: ood_loc citeseer load
+dataset: citeseer
+
+load: ood_loc citeseer
+skip_training: True
+
+# OOD LOC Settings
+ood: loc
+loc_remove_edges: False
+ood_eval_during_training: False

@@ -1,0 +1,7 @@
+custom_name: ood_loc
+experiment:
+  dataset: CORA_ML
+  ood: LOC
+  ood_loc_remove_edges: True
+training:
+  ood_eval_during_training: False

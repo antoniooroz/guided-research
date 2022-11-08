@@ -1,0 +1,10 @@
+custom_name: ood_perturb_normal citeseer load
+dataset: citeseer
+
+# Load classification model
+load: classification citeseer
+skip_training: true
+
+# OOD Perturb N settings
+ood: perturb
+perturb_mode: normal

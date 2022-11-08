@@ -1,0 +1,4 @@
+custom_name: classification load
+
+load: classification
+skip_training: True

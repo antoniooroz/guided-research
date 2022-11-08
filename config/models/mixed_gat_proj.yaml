@@ -1,0 +1,19 @@
+model:
+  type: MIXED_PROJ_GAT
+  samples_training: 3
+  initial_var: 1
+  guide_init_scale: 0.01
+  uncertainty: gat_attention_variance
+  train_mean: True
+  train_var: True
+  hidden_layer_size:
+    - 8
+  gat_hidden_layers_heads:
+    - 8
+  gat_skip_connections: False
+training:
+  learning_rate: 
+    TRAINING: 0.03
+  reg_lambda: 
+    TRAINING: 0.0
+  drop_prob: 0
