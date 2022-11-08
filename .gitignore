@@ -1,0 +1,7 @@
+.ipynb_checkpoints
+__pycache__
+.vscode
+saved_models
+colab.ipynb
+wandb
+.DS_Store
