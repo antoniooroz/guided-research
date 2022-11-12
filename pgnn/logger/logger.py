@@ -91,15 +91,13 @@ class LogIteration():
     def logStep(self, phase, results, weights):
         if phase in Phase.training_phases():
             phase = Phase.TRAINING
-        logStep = LogStep(self.step, 'train', phase, results, weights)
+        logStep = LogStep(self.configuration, self.step, 'train', phase, results, weights)
         self.step += 1
         
         self.log_training[phase].append(logStep)
-        if self.configuration.training.wandb_logging_during_training:
-            logStep.wandbLog()
         
     def logEval(self, phase, results, weights):
-        self.log_evaluation[phase] = LogStep(0, 'eval', phase, results, weights)
+        self.log_evaluation[phase] = LogStep(self.configuration, 0, 'eval', phase, results, weights)
         
     def logAdditionalStats(self, stats):
         self.additionalStats = stats
@@ -107,29 +105,26 @@ class LogIteration():
     def getEvaluationResults(self):
         data = {'seed': self.seed, 'iteration': self.iteration, 'steps': self.step}
         for logStep in self.log_evaluation.values():
-            data.update(logStep.getResults())
+            data.update(logStep.results)
             
         return data
             
         
 class LogStep():
-    def __init__(self, step, mode, phase: Phase, results: Results, weights: dict[str, LogWeight] = None):
+    def __init__(self, configuration: Configuration, step, mode, phase: Phase, results: Results, weights: dict[str, LogWeight] = None):
         self.mode = mode
         self.phase = phase
+        self.configuration = configuration
         self.log_prefix = f"{self.mode}/{self.phase.name}/"
         
         self.step = step
-        self.results = results
-        self.weights = weights
+        self.results = results.to_dict(prefix=self.log_prefix)
         
-    def getResults(self):
-        results = self.results.to_dict(prefix=self.log_prefix)
-            
-        return results
+        if self.configuration.training.wandb_logging_during_training:
+            # TODO: Maybe add weights
+            wandb.log(
+                data=self.results, 
+            )  
         
-    def wandbLog(self):        
-        wandb.log(
-            data=self.getResults(), 
-        )
 
     

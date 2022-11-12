@@ -194,9 +194,9 @@ def train_model(graph: SparseGraph, seed: int, iteration: int,
     # Evaluation
     model.set_eval()
     
-    resultsPerPhase = final_run(model, feature_matrix, idx_all, labels_all, oods_all)
+    finalResultsPerPhase = final_run(model, feature_matrix, idx_all, labels_all, oods_all)
     
-    logger.logEval(resultsPerPhase=resultsPerPhase, weights=model.log_weights())
+    logger.logEval(resultsPerPhase=finalResultsPerPhase, weights=model.log_weights())
     logger.logAdditionalStats({
         'last_epoch': epoch,
         'best_epoch': early_stopping.best.epoch,

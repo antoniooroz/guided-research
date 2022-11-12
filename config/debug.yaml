@@ -1,7 +1,7 @@
 training:
   max_epochs:
-    TRAINING: 10
+    TRAINING: 1000
 experiment:
-  iterations_per_seed: 1
+  iterations_per_seed: 5
   seeds:
-    end: 2
+    end: 3
