@@ -10,7 +10,7 @@ import warnings
 from typing import Dict, Union, Tuple, Any
 import numpy as np
 import scipy.sparse as sp
-from pgnn.configuration import *
+from pgnn.configuration.experiment_configuration import ExperimentConfiguration, AttributeNormalization
 from pgnn.preprocessing import normalize_attributes
 from pgnn.utils.utils import get_device, matrix_to_torch
 
@@ -198,17 +198,17 @@ class SparseGraph:
                         self.num_edges(), loop_string,
                         ', '.join(props)))
 
-    def normalize_features(self, configuration: Configuration):
-        if configuration.experiment.binary_attributes:
+    def normalize_features(self, experiment_configuration: ExperimentConfiguration):
+        if experiment_configuration.binary_attributes:
             self.attr_matrix[self.attr_matrix > 0] = 1
 
-        if configuration.experiment.normalize_attributes == AttributeNormalization.DEFAULT:
+        if experiment_configuration.normalize_attributes == AttributeNormalization.DEFAULT:
             self.attr_matrix = normalize_attributes(self.attr_matrix)
             self.attr_matrix = matrix_to_torch(self.attr_matrix).to(get_device())
-        elif configuration.experiment.normalize_attributes == AttributeNormalization.DIV_BY_SUM:
+        elif experiment_configuration.normalize_attributes == AttributeNormalization.DIV_BY_SUM:
             self.attr_matrix = matrix_to_torch(self.attr_matrix).to(get_device())
             self.attr_matrix = self.attr_matrix / (self.attr_matrix.sum(dim=-1).unsqueeze(-1) + 1e-10)
-        elif configuration.experiment.normalize_attributes == AttributeNormalization.NONE:
+        elif experiment_configuration.normalize_attributes == AttributeNormalization.NONE:
             self.attr_matrix = matrix_to_torch(self.attr_matrix).to(get_device())
         else:
             raise NotImplementedError()

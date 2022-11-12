@@ -11,11 +11,11 @@ import logging
 import wandb
 from pgnn.configuration.configuration import Configuration
 from pgnn.configuration.experiment_configuration import ExperimentMode
-from pgnn.data.graph_data import GraphData
 
 from pgnn.training import train_model
 
 from pgnn.logger import Logger
+from pgnn.data.graph_data import GraphData
 
 import  pgnn.utils.arguments_parsing as arguments_parsing
 
@@ -35,7 +35,7 @@ def run():
     if configuration.experiment.seeds.experiment_mode == ExperimentMode.TEST:
         logging.log(32, f"TEST MODE enabled")
 
-    graph_data = GraphData(configuration)
+    graph_data = GraphData(configuration.experiment)
 
     # Logging
     logger = Logger(configuration)
