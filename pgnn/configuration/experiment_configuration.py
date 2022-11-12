@@ -12,6 +12,8 @@ class ExperimentConfiguration(BaseConfiguration):
         self.datapoints_known: int = 1500
         self.iterations_per_seed = 5 # Iterations per seed
         
+        # Stochastic Block Model
+        
         # OOD
         self.ood: OOD = OOD.NONE 
         self.ood_loc_classes: list[int] = None
@@ -36,6 +38,7 @@ class ExperimentMode(Enum):
     TEST = 'test'
     
 class Dataset(Enum):
+    GENERATED_SBM = 'generated_sbm'
     CORA_ML = 'cora_ml'
     CITESEER = 'citeseer'
 

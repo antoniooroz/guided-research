@@ -15,6 +15,7 @@ from pgnn.base.network_mode import NetworkMode
 from pgnn.configuration.configuration import Configuration
 from pgnn.configuration.experiment_configuration import OOD, ExperimentMode
 from pgnn.configuration.training_configuration import Phase
+from pgnn.data.graph_data import GraphData
 from pgnn.logger import Logger
 import tqdm
 from pgnn.data import Data, ModelInput
@@ -26,7 +27,7 @@ import pgnn.models as models
 from pgnn.utils.utils import matrix_to_torch
 
 from .data.sparsegraph import SparseGraph
-from .preprocessing import gen_seeds, gen_splits
+from .preprocessing import gen_seeds
 from pgnn.utils import EarlyStopping, get_device, final_run
 
 import pyro
@@ -46,21 +47,14 @@ def get_dataloaders(idx, labels, oods_all, batch_size=None):
     return dataloaders
 
 
-def train_model(graph: SparseGraph, seed: int, iteration: int,
+def train_model(graph_data: GraphData, seed: int, iteration: int,
                 logger: Logger, configuration: Configuration = None):
     device = get_device()
     
     # Data
-    idx_all = gen_splits(
-        labels=graph.labels.astype('int64'), 
-        idx_split_args={
-            'ntrain_per_class': configuration.experiment.datapoints_training_per_class,
-            'nstopping': configuration.experiment.datapoints_stopping,
-            'nknown': configuration.experiment.datapoints_known,
-            'seed': seed
-        }, 
-        test=configuration.experiment.seeds.experiment_mode==ExperimentMode.TEST
-    )
+    graph = graph_data.get_graph(seed)
+    idx_all = graph_data.get_split(seed)
+    
     labels_all = torch.LongTensor(graph.labels.astype('int64')).to(device)
     oods_all = torch.zeros(labels_all.shape).to(device)
     feature_matrix = graph.attr_matrix.clone().detach().to(device)

@@ -11,9 +11,9 @@ import logging
 import wandb
 from pgnn.configuration.configuration import Configuration
 from pgnn.configuration.experiment_configuration import ExperimentMode
+from pgnn.data.graph_data import GraphData
 
 from pgnn.training import train_model
-from pgnn.data.io import load_dataset
 
 from pgnn.logger import Logger
 
@@ -35,10 +35,7 @@ def run():
     if configuration.experiment.seeds.experiment_mode == ExperimentMode.TEST:
         logging.log(32, f"TEST MODE enabled")
 
-    # Graph
-    graph = load_dataset(configuration.experiment.dataset.value)
-    graph.standardize(select_lcc=True)
-    graph.normalize_features(configuration=configuration)
+    graph_data = GraphData(configuration)
 
     # Logging
     logger = Logger(configuration)
@@ -55,7 +52,7 @@ def run():
             
             logger.newIteration(seed, iteration)
             train_model(
-                graph=graph, 
+                graph_data=graph_data, 
                 seed=seed, 
                 iteration=iteration, 
                 logger=logger, 
