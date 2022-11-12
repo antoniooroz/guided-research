@@ -23,7 +23,7 @@ from pgnn.data.model_input import ModelInput
 from pgnn.result.model_output import ModelOutput
 
 class PPNP(Base):    
-    def __init__(self, nfeatures: int, nclasses: int, configuration: Configuration, adj_matrix: torch.Tensor):
+    def __init__(self, nfeatures: int, nclasses: int, configuration: Configuration, adj_matrix: torch.Tensor, **kwargs):
         super().__init__()
         self.configuration = configuration
         self.nclasses = nclasses

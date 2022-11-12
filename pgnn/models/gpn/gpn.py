@@ -41,7 +41,7 @@ import copy
 class GPN(Model):
     """Graph Posterior Network model"""
 
-    def __init__(self, nfeatures, nclasses, configuration: Configuration, adj_matrix, training_labels):
+    def __init__(self, nfeatures, nclasses, configuration: Configuration, adj_matrix, training_labels, **kwargs):
         configuration.model.gpn_model['dim_features'] = nfeatures
         configuration.model.gpn_model['num_classes'] = nclasses
         super().__init__(ModelConfiguration(**configuration.model.gpn_model))

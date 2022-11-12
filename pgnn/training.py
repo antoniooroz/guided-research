@@ -33,10 +33,10 @@ import pyro
 
 def get_dataloaders(idx, labels, oods_all, batch_size=None):
     # MPS fix -> repeats only one item in dataloader...
-    if torch.backends.mps.is_available():
-        device = 'cpu'
-    else:
-        device = get_device()
+    #if torch.backends.mps.is_available():
+    #    device = 'cpu'
+    #else:
+    device = get_device()
     
     if batch_size is None:
         batch_size = max((val.numel() for val in idx.values()))
@@ -92,13 +92,13 @@ def train_model(graph: SparseGraph, seed: int, iteration: int,
     logging.log(22, f"PyTorch seed: {torch_seed}")
     
     # Model
-    model = getattr(models, configuration.model.type.value)(
-        configuration=configuration,
-        nfeatures=nfeatures,
-        nclasses=nclasses,
-        adj_matrix=adjacency_matrix,
-        training_labels=labels_all[idx_all[Phase.TRAINING]] # GPN parameter
-    ).to(device)
+    model = getattr(models, configuration.model.type.value)(**{
+        'configuration': configuration,
+        'nfeatures': nfeatures,
+        'nclasses': nclasses,
+        'adj_matrix': adjacency_matrix,
+        'training_labels': labels_all[idx_all[Phase.TRAINING]] # GPN parameter
+    }).to(device)
     model.init(torch_seed, configuration.custom_name, iteration, seed)
     
     if configuration.load is not None:

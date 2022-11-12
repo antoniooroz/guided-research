@@ -6,7 +6,7 @@ from pgnn.configuration.configuration import Configuration
 from .ppnp import PPNP
 
 class MCD_PPNP(MCD_Base):  
-    def __init__(self, nfeatures: int, nclasses: int, configuration: Configuration, adj_matrix: torch.Tensor):
+    def __init__(self, nfeatures: int, nclasses: int, configuration: Configuration, adj_matrix: torch.Tensor, **kwargs):
         super().__init__(nfeatures=nfeatures, nclasses=nclasses, configuration=configuration)
 
         self.model = PPNP(

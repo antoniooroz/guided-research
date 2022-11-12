@@ -12,7 +12,7 @@ import pyro.distributions as dist
 from .gat import GAT
 
 class P_GAT(P_Base):
-    def __init__(self, nfeatures: int, nclasses: int, configuration: Configuration, adj_matrix: torch.Tensor):
+    def __init__(self, nfeatures: int, nclasses: int, configuration: Configuration, adj_matrix: torch.Tensor, **kwargs):
         super().__init__()
         self.configuration = configuration
         self.nclasses = nclasses

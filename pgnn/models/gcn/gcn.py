@@ -21,7 +21,7 @@ from pgnn.utils import edge_dropout, get_device, preprocess_adj
 from pgnn.base import GraphConvolution, Base
 
 class GCN(Base):
-    def __init__(self, nfeatures: int, nclasses: int, configuration: Configuration, adj_matrix: torch.Tensor):
+    def __init__(self, nfeatures: int, nclasses: int, configuration: Configuration, adj_matrix: torch.Tensor, **kwargs):
         super().__init__()
         self.configuration = configuration
         self.nclasses = nclasses

@@ -8,7 +8,7 @@ import torch
 from pgnn.base import P_Base
 
 class P_GCN(P_Base):
-    def __init__(self, nfeatures: int, nclasses: int, configuration: Configuration, adj_matrix: torch.Tensor):
+    def __init__(self, nfeatures: int, nclasses: int, configuration: Configuration, adj_matrix: torch.Tensor, **kwargs):
         super().__init__()
         self.configuration = configuration
         self.nclasses = nclasses

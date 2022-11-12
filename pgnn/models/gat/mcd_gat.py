@@ -4,7 +4,7 @@ from pgnn.models import GAT
 import torch
 
 class MCD_GAT(MCD_Base):  
-    def __init__(self, nfeatures: int, nclasses: int, configuration: Configuration, adj_matrix: torch.Tensor):
+    def __init__(self, nfeatures: int, nclasses: int, configuration: Configuration, adj_matrix: torch.Tensor, **kwargs):
         super().__init__(nfeatures=nfeatures, nclasses=nclasses, configuration=configuration)
 
         self.model = GAT(
