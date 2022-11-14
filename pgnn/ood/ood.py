@@ -64,10 +64,9 @@ class OOD_Experiment(object):
             return np.asarray(self.configuration.experiment.ood_loc_classes)
         
         num_classes = self.labels_all.max() + 1
-        classes = np.arange(num_classes)
+        classes = np.arange(num_classes.cpu())
             
         if self.configuration.experiment.ood_loc_num_classes is not None:
-            raise NotImplementedError('Unused: Check if correct')
             num_loc_classes = self.configuration.experiment.ood_loc_num_classes
         else:
             num_loc_classes = math.floor(num_classes * self.configuration.experiment.ood_loc_frac)

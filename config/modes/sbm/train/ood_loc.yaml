@@ -1,0 +1,19 @@
+custom_name: ood_loc
+experiment:
+
+  seeds:
+    end: 10
+  iterations_per_seed: 3
+
+  dataset: GENERATED_SBM
+  datapoints_training_per_class: 20
+  datapoints_stopping: 200
+  datapoints_known: 800
+  sbm_classes: [300, 300, 300, 300]
+  
+  ood: LOC
+  ood_loc_remove_edges: True
+  ood_loc_num_classes: 1
+  
+training:
+  ood_eval_during_training: False

@@ -105,11 +105,11 @@ class NetworkModeResult:
         
         return result
     
-    def _roc_auc_score(self, ood_indicators: torch.Tensor, epistemic_uncertainties: torch.Tensor):
-        ood_indicators = ood_indicators.to('cpu')
-        epistemic_uncertainties = epistemic_uncertainties.to('cpu')
+    def _roc_auc_score(self, ood_indicators: torch.Tensor, uncertainties: torch.Tensor):
+        ood_indicators = ood_indicators.cpu()
+        uncertainties = uncertainties.cpu().detach().numpy()
         
-        return roc_auc_score(ood_indicators, epistemic_uncertainties)
+        return roc_auc_score(ood_indicators, uncertainties)
     
     def to_dict(self, prefix: str ='') -> dict[str, Any]:
         result = {}

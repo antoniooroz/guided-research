@@ -1,6 +1,7 @@
 import torch
 
 from pgnn.configuration.configuration import Configuration
+import math
 
 uncertainty_metrics = {}
 
@@ -111,14 +112,14 @@ def mean_variance_in_all_probabilities(data):
 def entropy(data):
     probs_mean = data["probs_mean"]
     result = (probs_mean * torch.log2(probs_mean))
-    result[probs_mean == 0] = 0 # Fix torch.log2(0) -> nan
+    result = result.nan_to_num() # Fix torch.log2(0) -> nan
     return -result.sum(dim=-1)
 
 # Range: [0, inf]
 def _entropy_per_sample(data):
     probs_all = data["probs_all"]
     result = (probs_all * torch.log2(probs_all))
-    result[probs_all == 0] = 0 # Fix torch.log2(0) -> nan
+    result = result.nan_to_num() # Fix torch.log2(0) -> nan
     return -result.sum(dim=-1)
 
 # Range: [0, inf]

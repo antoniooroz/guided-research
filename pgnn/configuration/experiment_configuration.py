@@ -13,6 +13,19 @@ class ExperimentConfiguration(BaseConfiguration):
         self.iterations_per_seed = 5 # Iterations per seed
         
         # Stochastic Block Model
+        self.sbm_nfeatures = 30
+        self.sbm_feature_variance = 1
+        self.sbm_euclidian_distance = 2
+        self.sbm_ood_euclidian_distance = 10
+        self.sbm_classes = [125, 125, 200, 125]
+        self.sbm_connection_probabilities = [
+            [0.1, 0.025, 0.02, 0.01],
+            [0.025, 0.1, 0.015, 0.005],
+            [0.02, 0.015, 0.1, 0.015],
+            [0.01, 0.005, 0.015, 0.12]
+        ]
+        self.sbm_nood = 1
+        
         
         # OOD
         self.ood: OOD = OOD.NONE 
