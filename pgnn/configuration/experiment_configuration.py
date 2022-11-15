@@ -14,8 +14,9 @@ class ExperimentConfiguration(BaseConfiguration):
         
         # Stochastic Block Model
         self.sbm_nfeatures = 30
-        self.sbm_feature_variance = 1
-        self.sbm_euclidian_distance = 2
+        self.sbm_feature_mean = 0
+        self.sbm_feature_variance = 10
+        self.sbm_feature_sampling_variance = 10
         self.sbm_ood_euclidian_distance = 10
         self.sbm_classes = [125, 125, 200, 125]
         self.sbm_connection_probabilities = [
