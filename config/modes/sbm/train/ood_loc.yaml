@@ -10,14 +10,12 @@ experiment:
   datapoints_stopping: 200
   datapoints_known: 1500
   sbm_classes: [600, 600, 600, 600]
-  sbm_connection_probabilities: [
-    [0.01, 0.001, 0.001, 0.0], 
-    [0.001, 0.01, 0.0, 0.0], 
-    [0.001, 0.0, 0.01, 0.001], 
-    [0.0, 0.0, 0.001, 0.01]
-  ]
-
-  sbm_nfeatures: 20
+  sbm_connection_probabilities_id_in_cluster: 0.01
+  sbm_connection_probabilities_id_out_cluster: 0.0002
+  sbm_connection_probabilities_ood_in_cluster: 0.
+  sbm_connection_probabilities_ood_out_cluster: 0.001
+  
+  sbm_nfeatures: 10
   sbm_feature_mean: 0
   sbm_feature_variance: 1
   sbm_feature_sampling_variance: 30

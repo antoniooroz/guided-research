@@ -1,4 +1,5 @@
 
+from math import sqrt
 from pgnn.configuration.experiment_configuration import Dataset, ExperimentMode, ExperimentConfiguration
 from pgnn.data.io import load_dataset
 from pgnn.data.sparsegraph import SparseGraph
@@ -44,7 +45,7 @@ class GraphData:
         # Create graph
         networkx_graph = nx.stochastic_block_model(
             self.experiment_configuration.sbm_classes,
-            self.experiment_configuration.sbm_connection_probabilities,
+            self.get_connection_probabilities(),
             nodelist=None,
             seed=seed,
             directed=False,
@@ -53,21 +54,23 @@ class GraphData:
         )
         
         """https://networkx.org/documentation/stable/auto_examples/drawing/plot_labels_and_colors.html"""
-        options = {"edgecolors": "tab:gray", "node_size": 5, "alpha": 1}
+        options = {"edgecolors": "tab:gray", "node_size": 25, "alpha": 1}
         
-        plt.figure(figsize=(6, 5))
-        pos = nx.spring_layout(networkx_graph, seed=seed, scale=25)
+        plt.figure(figsize=(12, 10))
+        spring_k =4/sqrt(sum(self.experiment_configuration.sbm_classes)) # default k is 1/sqrt
+        pos = nx.spring_layout(networkx_graph, seed=seed, scale=1, k=spring_k)
         
         i = 0
-        colors = ["red", "green", "blue", "cyan"]
+        colors = ["green", "blue", "cyan", "red"]
         for sbm_class, color in zip(self.experiment_configuration.sbm_classes, colors):
             nx.draw_networkx_nodes(networkx_graph, pos, nodelist=range(i, i+sbm_class), node_color=f"tab:{color}", **options)
             i+=sbm_class
         
         
-        nx.draw_networkx_edges(networkx_graph, pos, width=1.0, alpha=0.5)
+        nx.draw_networkx_edges(networkx_graph, pos, width=0.5, alpha=0.5)
         
         plt.tight_layout()
+        plt.legend()
         plt.savefig(f'{os.getcwd()}/plots/graphs/{seed}.png')
         plt.clf()
         
@@ -78,6 +81,29 @@ class GraphData:
         )
         
         return adj_matrix
+    
+    def get_connection_probabilities(self):
+        # TODO: For SBM also allow frac ood, etc.
+        
+        N = len(self.experiment_configuration.sbm_classes)
+        OOD_N = self.experiment_configuration.ood_loc_num_classes
+        
+        P_ID_IN = self.experiment_configuration.sbm_connection_probabilities_id_in_cluster
+        P_ID_OUT = self.experiment_configuration.sbm_connection_probabilities_id_out_cluster
+        P_OOD_IN = self.experiment_configuration.sbm_connection_probabilities_ood_in_cluster
+        P_OOD_OUT = self.experiment_configuration.sbm_connection_probabilities_ood_out_cluster
+        
+        # ID
+        connection_probabilities = (np.ones([N, N]) - np.eye(N)) * P_ID_OUT
+        connection_probabilities += np.diag(np.ones([N]) * P_ID_IN)
+        
+        connection_probabilities[N-OOD_N:, :] = P_OOD_OUT
+        connection_probabilities[:, N-OOD_N:] = P_OOD_OUT
+        
+        for i in range(N-OOD_N, N):
+            connection_probabilities[i,i] = P_OOD_IN
+        
+        return connection_probabilities
         
     def sbm_features(self, seed):
         features = []
@@ -85,10 +111,15 @@ class GraphData:
         
         random_state = seed
         
+        means = []
+        
         for c, nsamples in enumerate(self.experiment_configuration.sbm_classes):
+            mean = sp.stats.norm.rvs(loc=self.experiment_configuration.sbm_feature_mean, scale=self.experiment_configuration.sbm_feature_variance ,size=self.experiment_configuration.sbm_nfeatures, random_state=random_state)
+            means.append(mean)
+            
             samples = sp.stats.multivariate_normal(
-                mean=sp.stats.norm.rvs(loc=self.experiment_configuration.sbm_feature_mean, scale=self.experiment_configuration.sbm_feature_variance ,size=self.experiment_configuration.sbm_nfeatures, random_state=random_state),
-                cov=np.diag(np.abs(sp.stats.norm.rvs(scale=self.experiment_configuration.sbm_feature_sampling_variance, size=self.experiment_configuration.sbm_nfeatures, random_state=random_state+1))),
+                mean=mean,
+                cov=np.diag(np.abs(sp.stats.norm.rvs(loc=self.experiment_configuration.sbm_feature_sampling_variance, scale=1, size=self.experiment_configuration.sbm_nfeatures, random_state=random_state+1))),
                 seed=seed
             ).rvs(size=nsamples)
             
@@ -100,14 +131,25 @@ class GraphData:
         features = np.concatenate(features)
         labels = np.asarray(labels)
             
+        self.log_feature_distances(means)
+            
         return features, labels
+    
+    def log_feature_distances(self, means):
+        print('Feature Mean Distances:')
+        for i, mean in enumerate(means[:-1]):
+            out = f'{i}: '
+            for i_comp, mean_comp in enumerate(means[i+1:]):
+                out += f'{i_comp+i+1}  {np.linalg.norm(mean - mean_comp)} | '
+            print(out)
+            
             
     def plot_tsne(self, seed, features, labels):
         """https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html
         https://scipy-lectures.org/packages/scikit-learn/auto_examples/plot_tsne.html
         """
         tsne = TSNE(n_components=2, random_state=0)
-        colors = 'r', 'g', 'b', 'c' #, 'm', 'y', 'k', 'w', 'orange', 'purple'
+        colors = 'g', 'b', 'c', 'r' #, 'm', 'y', 'k', 'w', 'orange', 'purple'
         
         features_2d = tsne.fit_transform(features.cpu())
         

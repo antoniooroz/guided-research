@@ -19,14 +19,10 @@ class ExperimentConfiguration(BaseConfiguration):
         self.sbm_feature_sampling_variance = 10
         self.sbm_ood_euclidian_distance = 10
         self.sbm_classes = [125, 125, 200, 125]
-        self.sbm_connection_probabilities = [
-            [0.1, 0.025, 0.02, 0.01],
-            [0.025, 0.1, 0.015, 0.005],
-            [0.02, 0.015, 0.1, 0.015],
-            [0.01, 0.005, 0.015, 0.12]
-        ]
-        self.sbm_nood = 1
-        
+        self.sbm_connection_probabilities_id_in_cluster = 0.01
+        self.sbm_connection_probabilities_id_out_cluster = 0.001
+        self.sbm_connection_probabilities_ood_in_cluster = 0.01
+        self.sbm_connection_probabilities_ood_out_cluster = 0.001
         
         # OOD
         self.ood: OOD = OOD.NONE 
