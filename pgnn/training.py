@@ -15,12 +15,11 @@ from pgnn.base.network_mode import NetworkMode
 from pgnn.configuration.configuration import Configuration
 from pgnn.configuration.experiment_configuration import OOD, ExperimentMode
 from pgnn.configuration.training_configuration import Phase
-from pgnn.data.graph_data import GraphData
+from pgnn.data.graph_data import ActiveLearning, GraphData
 from pgnn.logger import Logger
 import tqdm
 from pgnn.data import Data, ModelInput
 
-from pgnn.ood import OOD_Experiment
 from pgnn.result.result import Info, Results
 
 import pgnn.models as models
@@ -32,52 +31,10 @@ from pgnn.utils import EarlyStopping, get_device, final_run
 
 import pyro
 
-def get_dataloaders(idx, labels, oods_all, batch_size=None):
-    # MPS fix -> repeats only one item in dataloader...
-    #if torch.backends.mps.is_available():
-    #    device = 'cpu'
-    #else:
-    device = get_device()
-    
-    if batch_size is None:
-        batch_size = max((val.numel() for val in idx.values()))
-    datasets = {phase: TensorDataset(ind.to(device), labels[ind].to(device), oods_all[ind].to(device)) for phase, ind in idx.items()}
-    dataloaders = {phase: DataLoader(dataset=dataset, batch_size=batch_size, shuffle=True)
-                   for phase, dataset in datasets.items()}
-    return dataloaders
-
-
 def train_model(graph_data: GraphData, seed: int, iteration: int,
                 logger: Logger, configuration: Configuration = None):
     device = get_device()
-    
-    # Data
-    graph = graph_data.get_graph(seed)
-    idx_all = graph_data.get_split(seed)
-    
-    labels_all = torch.LongTensor(graph.labels.astype('int64')).to(device)
-    oods_all = torch.zeros(labels_all.shape).to(device)
-    feature_matrix = graph.attr_matrix.clone().detach().to(device)
-    adjacency_matrix = matrix_to_torch(graph.adj_matrix)
-    
-    # OOD
-    if configuration.experiment.ood != OOD.NONE:
-        adjacency_matrix, feature_matrix, idx_all, labels_all, oods_all = OOD_Experiment.setup(
-            configuration=configuration, 
-            adjacency_matrix=adjacency_matrix, 
-            feature_matrix=feature_matrix, 
-            idx_all=idx_all, 
-            labels_all=labels_all,
-            oods_all=oods_all
-        )
-    
-    # OOD-Setting: Remove left-out classes
-    if configuration.experiment.ood_loc_remove_classes:
-        nclasses = torch.max(labels_all[oods_all==0]).cpu().item() + 1
-    else:
-        nclasses = torch.max(labels_all).cpu().item() + 1
-    
-    nfeatures = feature_matrix.shape[1]        
+    graph_data.init(seed)
 
     # Torch Seed and Logging
     logging.log(21, f"Training Model: {configuration.model.type.name}")
@@ -88,10 +45,10 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
     # Model
     model = getattr(models, configuration.model.type.value)(**{
         'configuration': configuration,
-        'nfeatures': nfeatures,
-        'nclasses': nclasses,
-        'adj_matrix': adjacency_matrix,
-        'training_labels': labels_all[idx_all[Phase.TRAINING]] # GPN parameter
+        'nfeatures': graph_data.nfeatures,
+        'nclasses': graph_data.nclasses,
+        'adj_matrix': graph_data.adjacency_matrix,
+        'training_labels': graph_data.labels_all[graph_data.idx_all[Phase.TRAINING]] # GPN parameter
     }).to(device)
     model.init(torch_seed, configuration.custom_name, iteration, seed)
     
@@ -104,9 +61,6 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
         )
         
     logger.watch(model)
-
-    # Dataloaders, etc.
-    dataloaders = get_dataloaders(idx_all, labels_all, oods_all)
     
     pyro.clear_param_store()
     
@@ -114,6 +68,8 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
         model=model,
         stop_variable=configuration.training.early_stopping_variable
     )
+
+    active_learning = ActiveLearning(configuration)
 
     # Training
     start_time = time.time()
@@ -139,9 +95,9 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                     ########################################################################
                     # Training Step                                                        #
                     ########################################################################
-                    for idx, labels, oods in dataloaders[dataloader_phase]:
+                    for idx, labels, oods in graph_data.dataloaders[dataloader_phase]:
                         data = Data(
-                            model_input=ModelInput(features=feature_matrix, indices=idx.to(device)),
+                            model_input=ModelInput(features=graph_data.feature_matrix, indices=idx.to(device)),
                             labels=labels.to(device),
                             ood_indicators=oods.to(device)
                         )
@@ -164,6 +120,8 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                         weights=model.log_weights()
                     )
                     
+                if configuration.experiment.active_learning and epoch >= configuration.experiment.active_learning_update_interval and epoch%configuration.experiment.active_learning_update_interval==0:
+                    active_learning.update(graph_data=graph_data, stopping_results=resultsPerPhase[Phase.STOPPING])
                 
                 pbar.set_postfix({'stopping acc': '{:.3f}'.format(resultsPerPhase[Phase.STOPPING].networkModeResults[NetworkMode.PROPAGATED].accuracy)})
                 ########################################################################
@@ -188,7 +146,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
     # Evaluation
     model.set_eval()
     
-    finalResultsPerPhase = final_run(model, feature_matrix, idx_all, labels_all, oods_all)
+    finalResultsPerPhase = final_run(model, graph_data.feature_matrix, graph_data.idx_all, graph_data.labels_all, graph_data.oods_all)
     
     logger.logEval(resultsPerPhase=finalResultsPerPhase, weights=model.log_weights())
     logger.logAdditionalStats({

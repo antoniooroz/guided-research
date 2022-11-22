@@ -35,7 +35,7 @@ def run():
     if configuration.experiment.seeds.experiment_mode == ExperimentMode.TEST:
         logging.log(32, f"TEST MODE enabled")
 
-    graph_data = GraphData(configuration.experiment)
+    graph_data = GraphData(configuration)
 
     # Logging
     logger = Logger(configuration)

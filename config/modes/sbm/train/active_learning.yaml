@@ -1,4 +1,4 @@
-custom_name: ood_loc
+custom_name: active_learning
 experiment:
 
   seeds:
@@ -20,9 +20,16 @@ experiment:
   sbm_feature_variance: 1
   sbm_feature_sampling_variance: 30
   
-  ood: LOC
-  ood_loc_remove_edges: True
-  ood_loc_num_classes: 1
+  active_learning: True
+  active_learning_update_interval: 100
+  active_learning_budget_per_update: 4
+  active_learning_budget: 20
+  active_learning_starting_class: [0]
+  active_learning_selector: RANDOM
+
+  ood: NONE
   
 training:
   ood_eval_during_training: False
+  early_stopping: 
+    TRAINING: False
