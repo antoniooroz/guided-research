@@ -10,6 +10,7 @@ class Configuration(BaseConfiguration):
     def __init__(self, dictionary: dict[str, Any] = None):
         self.config: list[str] = None
         self.custom_name: str = '<default>'
+        self.debug: bool = False
         self.load: str = None
         
         self.training: TrainingConfiguration = TrainingConfiguration()

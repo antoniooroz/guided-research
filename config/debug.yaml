@@ -1,7 +1,2 @@
-training:
-  max_epochs:
-    TRAINING: 1000
-experiment:
-  iterations_per_seed: 5
-  seeds:
-    end: 3
+custom_name: debug
+debug: True

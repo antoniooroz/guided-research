@@ -8,7 +8,7 @@ import pgnn.utils.stat_helpers as stat_helpers
 class Logger():
     def __init__(self, configuration: Configuration):
         self.wandb_run = wandb.init(
-            project="PGNN", 
+            project="Guided Research", entity="tum_daml_ba_antoniooroz",
             name=f'{configuration.model.type.name} [{configuration.custom_name}]',
             config=configuration.to_dict(),
             reinit=True
