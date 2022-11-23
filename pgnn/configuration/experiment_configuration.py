@@ -4,7 +4,11 @@ from typing import Any, Optional
 from pgnn.configuration.base_configuration import BaseConfiguration
 
 class ExperimentConfiguration(BaseConfiguration):
+    
     def __init__(self, dictionary: dict[str, Any] = None):
+        from pgnn.result.result import NetworkMode
+        from pgnn.configuration.model_configuration import UncertaintyMode
+        
         self.dataset : Dataset = Dataset.CORA_ML
         self.seeds: Seeds = Seeds()
         self.datapoints_training_per_class: int = 20
@@ -30,6 +34,8 @@ class ExperimentConfiguration(BaseConfiguration):
         self.active_learning_budget_per_update: int = 10
         self.active_learning_starting_class: Optional[list[int]] = None
         self.active_learning_selector: ActiveLearningSelector = ActiveLearningSelector.RANDOM
+        self.active_learning_selector_network_mode: NetworkMode = NetworkMode.ISOLATED
+        self.active_learning_selector_uncertainty_mode: UncertaintyMode = UncertaintyMode.EPISTEMIC
         
         # OOD
         self.ood: OOD = OOD.NONE 
@@ -110,10 +116,7 @@ class Seeds(BaseConfiguration):
     
 class ActiveLearningSelector(Enum):
     RANDOM = 0
-    ISOLATED_EPISTEMIC_UNCERTAINTY = 1
-    ISOLATED_ALEATORIC_UNCERTAINTY = 2
-    PROPAGATED_EPISTEMIC_UNCERTAINTY = 1
-    PROPAGATED_ALEATORIC_UNCERTAINTY = 2
+    UNCERTAINTY = 1
     
     
 class OODAttributeNormalization(Enum):

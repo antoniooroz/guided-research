@@ -1,6 +1,8 @@
 
 from math import sqrt
+from pgnn.base.network_mode import NetworkMode
 from pgnn.configuration.experiment_configuration import ActiveLearningSelector
+from pgnn.configuration.model_configuration import UncertaintyMode
 from pgnn.configuration.training_configuration import Phase
 from pgnn.data.io import load_dataset
 from pgnn.data.sparsegraph import SparseGraph
@@ -267,17 +269,31 @@ class ActiveLearning:
         self.budget = self.configuration.experiment.active_learning_budget
         self.budget_per_update = self.configuration.experiment.active_learning_budget_per_update
         self.selector = self.configuration.experiment.active_learning_selector
+        self.network_mode = self.configuration.experiment.active_learning_selector_network_mode
+        self.uncertainty_mode = self.configuration.experiment.active_learning_selector_uncertainty_mode
     
     def select(self, graph_data: GraphData, stopping_results: Results):
         idx_stopping = graph_data.idx_all[Phase.STOPPING]
+        budget_for_update = min(self.budget_per_update, self.budget)
         
         if self.selector == ActiveLearningSelector.RANDOM:
-            random_order = torch.randperm(idx_stopping.shape[0])
-            idx_stopping = idx_stopping[random_order]
-            budget_for_update = min(self.budget_per_update, self.budget)
-            return idx_stopping[:budget_for_update], idx_stopping[budget_for_update:]
+            order = torch.randperm(idx_stopping.shape[0])
+        elif self.selector == ActiveLearningSelector.UNCERTAINTY:
+            resultsForNetworkMode = stopping_results.networkModeResults[self.network_mode]
+            
+            if self.uncertainty_mode == UncertaintyMode.ALEATORIC: 
+                uncertainties = resultsForNetworkMode.model_output.aleatoric_uncertainties
+            else:
+                uncertainties = resultsForNetworkMode.model_output.epistemic_uncertainties
+            
+            order = uncertainties.argsort(dim=0, descending=True)
         else:
             raise NotImplementedError()
+        
+        idx_stopping = idx_stopping[order]
+        
+        #      Additional Training Samples     , Leftover Stopping Samples 
+        return idx_stopping[:budget_for_update], idx_stopping[budget_for_update:]
             
             
     
@@ -286,9 +302,10 @@ class ActiveLearning:
             return
         
         idx_new_training, idx_new_stopping = self.select(graph_data=graph_data, stopping_results=stopping_results)
-        self.budget = max(0, self.budget - self.budget_per_update)
         
         graph_data.idx_all[Phase.TRAINING] = torch.cat([graph_data.idx_all[Phase.TRAINING], idx_new_training]).to(idx_new_training.device)
         graph_data.idx_all[Phase.STOPPING] = idx_new_stopping
         
         graph_data.init_dataloaders()
+        
+        self.budget = max(0, self.budget - self.budget_per_update)

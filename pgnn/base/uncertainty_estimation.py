@@ -5,7 +5,7 @@ import math
 
 uncertainty_metrics = {}
 
-# TODO: Change OOD calculation so that now positive sampels are returned
+# TODO: Change OOD calculation so that now positive samples are returned
 # i.e. 0 -> low uncertainty, -> inf high uncertainty
 # Ranges are given as following: [low_uncertainty, high_uncertainty]
 

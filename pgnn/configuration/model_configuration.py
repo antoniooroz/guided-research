@@ -45,6 +45,10 @@ class NucType(Enum):
     MIN = 'min'
     MEAN = 'mean'
     
+class UncertaintyMode(Enum):
+    ALEATORIC = 0
+    EPISTEMIC = 1
+    
 class ModelType(Enum):    
     PPNP = 'PPNP'
     P_PPNP = 'P_PPNP'
