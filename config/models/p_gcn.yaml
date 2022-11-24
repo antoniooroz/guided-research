@@ -8,7 +8,7 @@ model:
   train_var: True
 training:
   learning_rate: 
-    TRAINING: 0.03
+    TRAINING: 0.1
   reg_lambda: 
-    TRAINING: 0.0
+      TRAINING: 0.0005
   drop_prob: 0

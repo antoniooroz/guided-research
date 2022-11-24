@@ -5,13 +5,18 @@ import pyro
 
 from pgnn.base.network_mode import NetworkMode
 
-@dataclass
 class ModelOutput:
-    logits: Optional[torch.Tensor] = None # Filled in forward
-    softmax_scores: Optional[torch.Tensor] = None # Filled in forward
-    predicted_classes: Optional[torch.Tensor] = None # Filled in predict
-    epistemic_uncertainties: Optional[torch.Tensor] = None # Filled in predict
-    aleatoric_uncertainties: Optional[torch.Tensor] = None # Filled in predict
+    def __init__(self,
+                logits: Optional[torch.Tensor] = None,
+                softmax_scores: Optional[torch.Tensor] = None,
+                predicted_classes: Optional[torch.Tensor] = None,
+                epistemic_uncertainties: Optional[torch.Tensor] = None,
+                aleatoric_uncertainties: Optional[torch.Tensor] = None):
+        self.logits = logits # Filled in forward
+        self.softmax_scores = softmax_scores # Filled in forward
+        self.predicted_classes = predicted_classes # Filled in predict
+        self.epistemic_uncertainties = epistemic_uncertainties # Filled in predict
+        self.aleatoric_uncertainties = aleatoric_uncertainties # Filled in predict
     
     def __add__(self, o):
         new_output = ModelOutput()
@@ -76,6 +81,22 @@ class ModelOutput:
             if pyro_key in pyro_result:
                 self.__dict__[key] = pyro_result[pyro_key]
                 
-@dataclass   
+    def cpu(self):
+        for key in self.__dict__:
+            if isinstance(self.__dict__[key], torch.Tensor):
+                self.__dict__[key] = self.__dict__[key].cpu().numpy()
+                
+        return self
+                
+
 class GPNModelOutput(ModelOutput):
-    alpha: Optional[torch.Tensor] = None
+    def __init__(self,
+                logits: Optional[torch.Tensor] = None,
+                softmax_scores: Optional[torch.Tensor] = None,
+                predicted_classes: Optional[torch.Tensor] = None,
+                epistemic_uncertainties: Optional[torch.Tensor] = None,
+                aleatoric_uncertainties: Optional[torch.Tensor] = None,
+                alpha: Optional[torch.Tensor] = None):
+        super.__init__(logits, softmax_scores, predicted_classes, epistemic_uncertainties, aleatoric_uncertainties)
+        self.alpha = alpha
+    

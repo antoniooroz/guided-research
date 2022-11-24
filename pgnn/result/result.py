@@ -8,24 +8,32 @@ from .model_output import ModelOutput
 import torch
 from sklearn.metrics import roc_auc_score
 
+import numpy as np
+
 class NetworkModeResult:
-    
     def __init__(self, 
                  model_output: ModelOutput = None, 
                  loss: float = 0.0, 
                  loss_unnormalized = None,
                  data: Data = None):
-        self.model_output: ModelOutput = model_output if model_output else ModelOutput()
         
-        if model_output and model_output.predicted_classes is not None and data:
-            correct_datapoint_indicator = (model_output.predicted_classes==data.labels)
-            self.datapoints_correct: int = correct_datapoint_indicator[data.ood_indicators==0].sum().item()
-            self.datapoints_false: int = (~correct_datapoint_indicator)[data.ood_indicators==0].sum().item()
+        # Necessary Model Outputs, don't want to leave them on GPU        
+        predicted_classes = model_output.predicted_classes.cpu().detach().numpy() if model_output and model_output.predicted_classes is not None else None
+        self.epistemic_uncertainties =  model_output.epistemic_uncertainties.cpu().detach().numpy() if model_output and model_output.epistemic_uncertainties is not None else None
+        self.aleatoric_uncertainties =  model_output.aleatoric_uncertainties.cpu().detach().numpy() if model_output else None
+        
+        labels = data.labels.cpu().detach().numpy() if data else None
+        ood_indicators = data.ood_indicators.cpu().detach().numpy() if data else None
+        
+        if predicted_classes is not None and data:
+            correct_datapoint_indicator = (predicted_classes==labels)
+            self.datapoints_correct: int = correct_datapoint_indicator[ood_indicators==0].sum().item()
+            self.datapoints_false: int = (~correct_datapoint_indicator)[ood_indicators==0].sum().item()
             
-            if data.ood_indicators.sum().item() > 0:
+            if ood_indicators.sum().item() > 0:
                 # sum of empty tensor is buggy on MPS, therefore check if tensors will be empty
-                self.ood_datapoints_correct: int = correct_datapoint_indicator[data.ood_indicators==1].sum().item()
-                self.ood_datapoints_false: int = (~correct_datapoint_indicator)[data.ood_indicators==1].sum().item()
+                self.ood_datapoints_correct: int = correct_datapoint_indicator[ood_indicators==1].sum().item()
+                self.ood_datapoints_false: int = (~correct_datapoint_indicator)[ood_indicators==1].sum().item()
             else:
                 self.ood_datapoints_correct: int = 0
                 self.ood_datapoints_false: int = 0
@@ -41,7 +49,7 @@ class NetworkModeResult:
         else:
             self._loss_unnormalized: float = loss * self.datapoints
         
-        self.ood_indicators: torch.Tensor = data.ood_indicators if data else None
+        self.ood_indicators: torch.Tensor = ood_indicators
         
         self._ood_auc_roc_aleatoric: float = None
         self._ood_auc_roc_epistemic: float = None
@@ -77,8 +85,8 @@ class NetworkModeResult:
         if not self.ood_datapoints:
             return None
         
-        if self._ood_auc_roc_aleatoric is None and self.model_output.aleatoric_uncertainties is not None:
-            self._ood_auc_roc_aleatoric = self._roc_auc_score(self.ood_indicators, self.model_output.aleatoric_uncertainties)
+        if self._ood_auc_roc_aleatoric is None and self.aleatoric_uncertainties is not None:
+            self._ood_auc_roc_aleatoric = self._roc_auc_score(self.ood_indicators, self.aleatoric_uncertainties)
         return self._ood_auc_roc_aleatoric
     
     @property
@@ -86,29 +94,29 @@ class NetworkModeResult:
         if not self.ood_datapoints:
             return None
         
-        if self._ood_auc_roc_epistemic is None and self.model_output.epistemic_uncertainties is not None:
-            self._ood_auc_roc_epistemic = self._roc_auc_score(self.ood_indicators, self.model_output.epistemic_uncertainties)
+        if self._ood_auc_roc_epistemic is None and self.epistemic_uncertainties is not None:
+            self._ood_auc_roc_epistemic = self._roc_auc_score(self.ood_indicators, self.epistemic_uncertainties)
         return self._ood_auc_roc_epistemic
     
     def __add__(self, o):
         result: NetworkModeResult = NetworkModeResult(
-            model_output=self.model_output + o.model_output,
+            model_output=None,
             loss_unnormalized=self._loss_unnormalized + o._loss_unnormalized,
         )
+        result.aleatoric_uncertainties = np.concatenate([self.aleatoric_uncertainties, o.aleatoric_uncertainties])
+        result.epistemic_uncertainties = np.concatenate([self.epistemic_uncertainties, o.epistemic_uncertainties])
+        
         result.datapoints_correct = self.datapoints_correct + o.datapoints_correct
         result.datapoints_false = self.datapoints_false + o.datapoints_false
         
         result.ood_datapoints_correct = self.ood_datapoints_correct + o.ood_datapoints_correct
         result.ood_datapoints_false = self.ood_datapoints_false + o.ood_datapoints_false
         
-        result.ood_indicators = torch.cat([self.ood_indicators, o.ood_indicators]).to(self.ood_indicators.device)
+        result.ood_indicators = np.concatenate([self.ood_indicators, o.ood_indicators])
         
         return result
     
-    def _roc_auc_score(self, ood_indicators: torch.Tensor, uncertainties: torch.Tensor):
-        ood_indicators = ood_indicators.cpu()
-        uncertainties = uncertainties.cpu().detach().numpy()
-        
+    def _roc_auc_score(self, ood_indicators: torch.Tensor, uncertainties: torch.Tensor):        
         return roc_auc_score(ood_indicators, uncertainties)
     
     def to_dict(self, prefix: str ='') -> dict[str, Any]:
@@ -116,7 +124,7 @@ class NetworkModeResult:
         
         for prop in dir(self):
             if not prop.startswith('_') and prop != 'model_output':
-                if not isinstance(getattr(self, prop), torch.Tensor):
+                if not isinstance(getattr(self, prop), np.ndarray):
                     result[f"{prefix}{prop}"] = getattr(self, prop)
     
         return result
@@ -141,7 +149,6 @@ class Info():
         
         return result
 
-@dataclass
 class Results():
     
     def __init__(self, networkModeResults: dict[NetworkMode, NetworkModeResult] = None, info: Info = None):

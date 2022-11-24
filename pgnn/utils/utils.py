@@ -21,7 +21,7 @@ from pgnn.result.result import Results
 def preprocess_adj(adj: torch.Tensor, laplacian=True, self_loop=True) -> torch.Tensor:
     """Preprocessing of adjacency matrix for simple GCN model and conversion to tuple representation."""
     if self_loop:
-        adj = adj + torch.eye(adj.shape[0], device=adj.device)
+        adj = adj + torch.eye(adj.shape[0]).to(adj.device)
 
     if laplacian:
         adj_normalized = normalize_adj(adj)
@@ -35,8 +35,8 @@ def normalize_adj(adj: torch.Tensor) -> torch.Tensor:
     rowsum = adj.sum(dim=1)
     d_inv_sqrt = rowsum.pow(-0.5).flatten()
     d_inv_sqrt[torch.isinf(d_inv_sqrt)] = 0.
-    d_mat_inv_sqrt = torch.diag(d_inv_sqrt, device=adj.device)
-    return (adj @ d_mat_inv_sqrt).transpose() @ d_mat_inv_sqrt
+    d_mat_inv_sqrt = torch.diag(d_inv_sqrt).to(adj.device)
+    return adj.matmul(d_mat_inv_sqrt).T.matmul(d_mat_inv_sqrt)
 
 def sparse_matrix_to_torch(X):
     coo = X.tocoo()

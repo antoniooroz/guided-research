@@ -1,5 +1,5 @@
 model:
-  type: PPNP
+  type: GCN
 training:
   learning_rate: 
     TRAINING: 0.01
