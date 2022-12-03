@@ -86,6 +86,10 @@ class LogIteration():
             Phase.STOPPING: None,
             Phase.VALTEST: None
         }
+        
+        if configuration.experiment.active_learning:
+            self.log_training[Phase.ACTIVE_LEARNING] = []
+        
         self.additionalStats=None
         
     def logStep(self, phase, results, weights):

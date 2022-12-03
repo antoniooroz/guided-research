@@ -4,7 +4,7 @@ ModePath="/config/modes/sbm/train/"
 ActiveLearningUncertaintyPath="/config/active_learning/"
 FileExt=".yaml"
 
-for i in "gcn"
+for i in "ppnp" "p_ppnp" "gcn" "p_gcn" "gat" "p_gat"
 do
     for j in "active_learning"
     do

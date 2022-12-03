@@ -87,7 +87,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
             
             for epoch in pbar:
                 resultsPerPhase: dict[Phase, Results] = {}
-                for phase in Phase.get_phases(training_phase):
+                for phase in Phase.get_phases(training_phase, active_learning=configuration.experiment.active_learning):
                     start_time_phase = time.time()
                     results = Results()
                     
@@ -121,7 +121,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                     )
                     
                 if configuration.experiment.active_learning and epoch >= configuration.experiment.active_learning_update_interval and epoch%configuration.experiment.active_learning_update_interval==0:
-                    active_learning.update(graph_data=graph_data, stopping_results=resultsPerPhase[Phase.STOPPING])
+                    active_learning.update(graph_data=graph_data, active_learning_results=resultsPerPhase[Phase.ACTIVE_LEARNING])
                 
                 pbar.set_postfix({'stopping acc': '{:.3f}'.format(resultsPerPhase[Phase.STOPPING].networkModeResults[NetworkMode.PROPAGATED].accuracy)})
                 ########################################################################

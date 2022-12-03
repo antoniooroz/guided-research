@@ -138,8 +138,17 @@ class GraphData:
     
 class SBM:
     def init(graph_data: GraphData, seed):
+        import time
+        start_time = time.time()
+        
         adj_matrix = SBM.generate_graph(graph_data, seed)
+        end_time_adj_matrix = time.time()
+        print(f'adj_matrix: {end_time_adj_matrix-start_time}')
+        
         features, labels = SBM.features(graph_data, seed)
+        end_time_features = time.time()
+        print(f'features: {end_time_features-end_time_adj_matrix}')
+        
         graph = SparseGraph(
             adj_matrix=adj_matrix,
             attr_matrix=features,
@@ -164,6 +173,8 @@ class SBM:
         )
         
         """https://networkx.org/documentation/stable/auto_examples/drawing/plot_labels_and_colors.html"""
+        
+        """
         options = {"edgecolors": "tab:gray", "node_size": 25, "alpha": 1}
         
         plt.figure(figsize=(12, 10))
@@ -176,13 +187,13 @@ class SBM:
             nx.draw_networkx_nodes(networkx_graph, pos, nodelist=range(i, i+sbm_class), node_color=f"tab:{color}", **options)
             i+=sbm_class
         
-        
         nx.draw_networkx_edges(networkx_graph, pos, width=0.5, alpha=0.5)
         
         plt.tight_layout()
         plt.legend()
         plt.savefig(f'{os.getcwd()}/plots/graphs/{seed}.png')
         plt.clf()
+        """
         
         n_nodes = sum(graph_data.experiment_configuration.sbm_classes)
         
@@ -247,22 +258,31 @@ class SBM:
             
         return features, labels
     
-class ActiveLearning:
+class ActiveLearning:    
     def set_starting_class(graph_data: GraphData):
         if graph_data.experiment_configuration.active_learning_starting_class is not None:
             idx_training_left_out = graph_data.idx_all[Phase.TRAINING]
             idx_training_new = None
             for c in graph_data.experiment_configuration.active_learning_starting_class:
                 new = idx_training_left_out[graph_data.labels_all[idx_training_left_out]==c]
+                idx_training_left_out = idx_training_left_out[graph_data.labels_all[idx_training_left_out]!=c]
+                
+                if graph_data.experiment_configuration.active_learning_start_cap_per_class < graph_data.experiment_configuration.datapoints_training_per_class:
+                    order = torch.randperm(new.shape[0])
+                    new = new[order]
+                    
+                    left_out = new[graph_data.experiment_configuration.active_learning_start_cap_per_class:]
+                    idx_training_left_out = torch.cat([idx_training_left_out, left_out], dim=0).to(left_out.device)
+                    
+                    new = new[:graph_data.experiment_configuration.active_learning_start_cap_per_class]
+                
                 if idx_training_new is None:
                     idx_training_new = new
                 else:
                     idx_training_new = torch.cat([idx_training_new, new]).to(new.device)
-                    
-                idx_training_left_out = idx_training_left_out[graph_data.labels_all[idx_training_left_out]!=c]
 
             graph_data.idx_all[Phase.TRAINING] = idx_training_new
-            graph_data.idx_all[Phase.STOPPING] = torch.cat([graph_data.idx_all[Phase.STOPPING], idx_training_left_out]).to(idx_training_new.device)
+            graph_data.idx_all[Phase.ACTIVE_LEARNING] = idx_training_left_out.to(idx_training_new.device)
     
     def __init__(self, configuration: Configuration):
         self.configuration = configuration
@@ -272,39 +292,38 @@ class ActiveLearning:
         self.network_mode = self.configuration.experiment.active_learning_selector_network_mode
         self.uncertainty_mode = self.configuration.experiment.active_learning_selector_uncertainty_mode
     
-    def select(self, graph_data: GraphData, stopping_results: Results):
-        idx_stopping = graph_data.idx_all[Phase.STOPPING]
+    def select(self, graph_data: GraphData, active_learning_results: Results):
+        idx_active_learning = graph_data.idx_all[Phase.ACTIVE_LEARNING]
         budget_for_update = min(self.budget_per_update, self.budget)
         
         if self.selector == ActiveLearningSelector.RANDOM:
-            order = torch.randperm(idx_stopping.shape[0])
+            order = torch.randperm(idx_active_learning.shape[0])
         elif self.selector == ActiveLearningSelector.UNCERTAINTY:
-            resultsForNetworkMode = stopping_results.networkModeResults[self.network_mode]
+            resultsForNetworkMode = active_learning_results.networkModeResults[self.network_mode]
             
             if self.uncertainty_mode == UncertaintyMode.ALEATORIC: 
-                uncertainties = resultsForNetworkMode.model_output.aleatoric_uncertainties
+                uncertainties = resultsForNetworkMode.aleatoric_uncertainties
             else:
-                uncertainties = resultsForNetworkMode.model_output.epistemic_uncertainties
+                uncertainties = resultsForNetworkMode.epistemic_uncertainties
             
-            order = uncertainties.argsort(dim=0, descending=True)
+            order = uncertainties.argsort(axis=0)
         else:
             raise NotImplementedError()
         
-        idx_stopping = idx_stopping[order]
+        idx_active_learning = idx_active_learning[order]
         
-        #      Additional Training Samples     , Leftover Stopping Samples 
-        return idx_stopping[:budget_for_update], idx_stopping[budget_for_update:]
+        split_index = idx_active_learning.shape[0]-1-budget_for_update
+        #      Additional Training Samples     , Leftover Active Learning Samples 
+        return idx_active_learning[split_index:], idx_active_learning[:split_index]
             
-            
-    
-    def update(self, graph_data: GraphData, stopping_results: Results):
+    def update(self, graph_data: GraphData, active_learning_results: Results):
         if self.budget == 0:
             return
         
-        idx_new_training, idx_new_stopping = self.select(graph_data=graph_data, stopping_results=stopping_results)
+        idx_new_training, idx_new_active_learning = self.select(graph_data=graph_data, active_learning_results=active_learning_results)
         
         graph_data.idx_all[Phase.TRAINING] = torch.cat([graph_data.idx_all[Phase.TRAINING], idx_new_training]).to(idx_new_training.device)
-        graph_data.idx_all[Phase.STOPPING] = idx_new_stopping
+        graph_data.idx_all[Phase.ACTIVE_LEARNING] = idx_new_active_learning
         
         graph_data.init_dataloaders()
         
