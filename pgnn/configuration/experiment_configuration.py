@@ -9,7 +9,9 @@ class ExperimentConfiguration(BaseConfiguration):
         from pgnn.result.result import NetworkMode
         from pgnn.configuration.model_configuration import UncertaintyMode
         
-        self.dataset : Dataset = Dataset.CORA_ML
+        self.dataset: Dataset = Dataset.CORA_ML
+        self.num_classes: int = 10
+    
         self.seeds: Seeds = Seeds()
         self.datapoints_training_per_class: int = 20
         self.datapoints_stopping: int = 500

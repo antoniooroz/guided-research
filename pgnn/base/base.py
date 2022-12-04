@@ -105,7 +105,8 @@ class Base(PyroModule):
                 results.networkModeResults[network_mode] = NetworkModeResult(
                     model_output=model_output,
                     loss=loss,
-                    data=data
+                    data=data,
+                    configuration=self.configuration
                 )
                 
         return results

@@ -5,6 +5,7 @@ import torch
 
 def get_stats_for_column(table, column_name, logging_prefix):
     column_data = table.get_column(column_name, convert_to="numpy")
+    
     iters = table.get_column("iteration", convert_to="numpy")
     seeds = table.get_column("seed", convert_to="numpy")
 

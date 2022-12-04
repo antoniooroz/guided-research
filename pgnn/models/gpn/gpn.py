@@ -317,7 +317,8 @@ class GPN(Model):
             results.networkModeResults[network_mode] = NetworkModeResult(
                 model_output=model_output,
                 loss=loss if network_mode==NetworkMode.PROPAGATED else 0,
-                data=data
+                data=data,
+                configuration=self.configuration
             )
         
         return results

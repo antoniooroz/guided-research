@@ -1,3 +1,4 @@
+from collections import Counter, OrderedDict
 from dataclasses import dataclass, asdict
 from typing import Any, Optional
 from pgnn.base.network_mode import NetworkMode
@@ -15,12 +16,13 @@ class NetworkModeResult:
                  model_output: ModelOutput = None, 
                  loss: float = 0.0, 
                  loss_unnormalized = None,
-                 data: Data = None):
+                 data: Data = None,
+                 configuration = None):
         
         # Necessary Model Outputs, don't want to leave them on GPU        
         predicted_classes = model_output.predicted_classes.cpu().detach().numpy() if model_output and model_output.predicted_classes is not None else None
-        self.epistemic_uncertainties =  model_output.epistemic_uncertainties.cpu().detach().numpy() if model_output and model_output.epistemic_uncertainties is not None else None
-        self.aleatoric_uncertainties =  model_output.aleatoric_uncertainties.cpu().detach().numpy() if model_output else None
+        self._epistemic_uncertainties =  model_output.epistemic_uncertainties.cpu().detach().numpy() if model_output and model_output.epistemic_uncertainties is not None else None
+        self._aleatoric_uncertainties =  model_output.aleatoric_uncertainties.cpu().detach().numpy() if model_output else None
         
         labels = data.labels.cpu().detach().numpy() if data else None
         ood_indicators = data.ood_indicators.cpu().detach().numpy() if data else None
@@ -49,10 +51,15 @@ class NetworkModeResult:
         else:
             self._loss_unnormalized: float = loss * self.datapoints
         
-        self.ood_indicators: torch.Tensor = ood_indicators
+        self._ood_indicators = ood_indicators
         
         self._ood_auc_roc_aleatoric: float = None
         self._ood_auc_roc_epistemic: float = None
+        
+        self.datapoints_per_class = Counter()
+        if labels is not None and configuration is not None:
+            for c in range(configuration.experiment.num_classes):
+                self.datapoints_per_class[c] = (labels == c).sum()
 
     @property
     def datapoints(self) -> int:
@@ -85,8 +92,8 @@ class NetworkModeResult:
         if not self.ood_datapoints:
             return None
         
-        if self._ood_auc_roc_aleatoric is None and self.aleatoric_uncertainties is not None:
-            self._ood_auc_roc_aleatoric = self._roc_auc_score(self.ood_indicators, self.aleatoric_uncertainties)
+        if self._ood_auc_roc_aleatoric is None and self._aleatoric_uncertainties is not None:
+            self._ood_auc_roc_aleatoric = self._roc_auc_score(self._ood_indicators, self._aleatoric_uncertainties)
         return self._ood_auc_roc_aleatoric
     
     @property
@@ -94,17 +101,17 @@ class NetworkModeResult:
         if not self.ood_datapoints:
             return None
         
-        if self._ood_auc_roc_epistemic is None and self.epistemic_uncertainties is not None:
-            self._ood_auc_roc_epistemic = self._roc_auc_score(self.ood_indicators, self.epistemic_uncertainties)
+        if self._ood_auc_roc_epistemic is None and self._epistemic_uncertainties is not None:
+            self._ood_auc_roc_epistemic = self._roc_auc_score(self._ood_indicators, self._epistemic_uncertainties)
         return self._ood_auc_roc_epistemic
     
-    def __add__(self, o):
+    def __add__(self, o: 'NetworkModeResult'):
         result: NetworkModeResult = NetworkModeResult(
             model_output=None,
-            loss_unnormalized=self._loss_unnormalized + o._loss_unnormalized,
+            loss_unnormalized=self._loss_unnormalized + o._loss_unnormalized
         )
-        result.aleatoric_uncertainties = np.concatenate([self.aleatoric_uncertainties, o.aleatoric_uncertainties])
-        result.epistemic_uncertainties = np.concatenate([self.epistemic_uncertainties, o.epistemic_uncertainties])
+        result._aleatoric_uncertainties = np.concatenate([self._aleatoric_uncertainties, o._aleatoric_uncertainties])
+        result._epistemic_uncertainties = np.concatenate([self._epistemic_uncertainties, o._epistemic_uncertainties])
         
         result.datapoints_correct = self.datapoints_correct + o.datapoints_correct
         result.datapoints_false = self.datapoints_false + o.datapoints_false
@@ -112,7 +119,9 @@ class NetworkModeResult:
         result.ood_datapoints_correct = self.ood_datapoints_correct + o.ood_datapoints_correct
         result.ood_datapoints_false = self.ood_datapoints_false + o.ood_datapoints_false
         
-        result.ood_indicators = np.concatenate([self.ood_indicators, o.ood_indicators])
+        result._ood_indicators = np.concatenate([self._ood_indicators, o._ood_indicators])
+        
+        result.datapoints_per_class = self.datapoints_per_class + o.datapoints_per_class
         
         return result
     
@@ -124,7 +133,10 @@ class NetworkModeResult:
         
         for prop in dir(self):
             if not prop.startswith('_') and prop != 'model_output':
-                if not isinstance(getattr(self, prop), np.ndarray):
+                if isinstance(getattr(self, prop), dict):
+                    for key, val in getattr(self, prop).items():
+                        result[f"{prefix}{prop}_{key}"] = val
+                else:
                     result[f"{prefix}{prop}"] = getattr(self, prop)
     
         return result

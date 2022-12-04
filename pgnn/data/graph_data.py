@@ -302,9 +302,9 @@ class ActiveLearning:
             resultsForNetworkMode = active_learning_results.networkModeResults[self.network_mode]
             
             if self.uncertainty_mode == UncertaintyMode.ALEATORIC: 
-                uncertainties = resultsForNetworkMode.aleatoric_uncertainties
+                uncertainties = resultsForNetworkMode._aleatoric_uncertainties
             else:
-                uncertainties = resultsForNetworkMode.epistemic_uncertainties
+                uncertainties = resultsForNetworkMode._epistemic_uncertainties
             
             order = uncertainties.argsort(axis=0)
         else:
@@ -312,7 +312,7 @@ class ActiveLearning:
         
         idx_active_learning = idx_active_learning[order]
         
-        split_index = idx_active_learning.shape[0]-1-budget_for_update
+        split_index = idx_active_learning.shape[0]-budget_for_update
         #      Additional Training Samples     , Leftover Active Learning Samples 
         return idx_active_learning[split_index:], idx_active_learning[:split_index]
             
