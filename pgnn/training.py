@@ -29,6 +29,7 @@ from .data.sparsegraph import SparseGraph
 from .preprocessing import gen_seeds
 from pgnn.utils import EarlyStopping, get_device, final_run
 
+import wandb
 import pyro
 
 def train_model(graph_data: GraphData, seed: int, iteration: int,
@@ -103,10 +104,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                         )
                         
                         results += model.step(phase if epoch > 0 else Phase.INIT, data)
-                        
-                    ########################################################################
-                    # Logging                                                              #
-                    ########################################################################
+                    
                     results.info = Info(
                         duration=time.time() - start_time_phase,
                         seed=seed,
@@ -114,14 +112,22 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                     )
                     
                     resultsPerPhase[phase] = results
+
+                    
+                if configuration.experiment.active_learning and epoch >= configuration.experiment.active_learning_update_interval and epoch%configuration.experiment.active_learning_update_interval==0:
+                    active_learning_update_logs = active_learning.update(graph_data=graph_data, active_learning_results=resultsPerPhase[Phase.ACTIVE_LEARNING])
+                    resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_in = active_learning_update_logs['mean_l2_distance_in']
+                    resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_out = active_learning_update_logs['mean_l2_distance_out']
+
+                ########################################################################
+                # Logging                                                              #
+                ########################################################################
+                for phase, results in resultsPerPhase.items():
                     logger.logStep(
                         phase=phase, 
                         results=results,
                         weights=model.log_weights()
                     )
-                    
-                if configuration.experiment.active_learning and epoch >= configuration.experiment.active_learning_update_interval and epoch%configuration.experiment.active_learning_update_interval==0:
-                    active_learning.update(graph_data=graph_data, active_learning_results=resultsPerPhase[Phase.ACTIVE_LEARNING])
                 
                 pbar.set_postfix({'stopping acc': '{:.3f}'.format(resultsPerPhase[Phase.STOPPING].networkModeResults[NetworkMode.PROPAGATED].accuracy)})
                 ########################################################################

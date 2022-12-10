@@ -1,0 +1,5 @@
+experiment:
+  active_learning_selector: L2_DISTANCE
+  active_learning_selector_network_mode: PROPAGATED
+  active_learning_selector_uncertainty_mode: EPISTEMIC
+  active_learning_l2_distance_use_centroids: True

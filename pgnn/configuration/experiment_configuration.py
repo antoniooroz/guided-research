@@ -39,6 +39,8 @@ class ExperimentConfiguration(BaseConfiguration):
         self.active_learning_selector: ActiveLearningSelector = ActiveLearningSelector.RANDOM
         self.active_learning_selector_network_mode: NetworkMode = NetworkMode.ISOLATED
         self.active_learning_selector_uncertainty_mode: UncertaintyMode = UncertaintyMode.EPISTEMIC
+        self.active_learning_l2_distance_logging: bool = False
+        self.active_learning_l2_distance_use_centroids: bool = False
         
         # OOD
         self.ood: OOD = OOD.NONE 
@@ -120,6 +122,7 @@ class Seeds(BaseConfiguration):
 class ActiveLearningSelector(Enum):
     RANDOM = 0
     UNCERTAINTY = 1
+    L2_DISTANCE = 2
     
     
 class OODAttributeNormalization(Enum):

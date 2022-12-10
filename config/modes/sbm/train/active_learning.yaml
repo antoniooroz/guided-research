@@ -30,6 +30,7 @@ experiment:
   active_learning_selector: UNCERTAINTY
   active_learning_selector_network_mode: ISOLATED
   active_learning_selector_uncertainty_mode: ALEATORIC
+  active_learning_l2_distance_logging: True
 
   ood: NONE
   

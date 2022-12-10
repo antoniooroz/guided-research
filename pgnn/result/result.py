@@ -146,12 +146,16 @@ class Info():
     duration: float = 0.0
     seed: int = 0
     iteration: int = 0
+    mean_l2_distance_in: float = None
+    mean_l2_distance_out: float = None
     
     def __add__(self, o):
         return Info(
             duration=self.duration + o.duration,
             seed=self.seed,
-            iteration=self.iteration
+            iteration=self.iteration,
+            mean_l2_distance_in = self.mean_l2_distance_in,
+            mean_l2_distance_out = self.mean_l2_distance_out
         )
         
     def to_dict(self, prefix: str ='') -> dict[str, Any]:
