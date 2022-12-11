@@ -31,6 +31,8 @@ class ExperimentConfiguration(BaseConfiguration):
         self.sbm_connection_probabilities_ood_out_cluster = 0.001
         
         self.active_learning: bool = False
+        self.active_learning_dynamic_update: bool = False
+        self.active_learning_dynamic_update_patience: int = 20
         self.active_learning_update_interval: int = 0
         self.active_learning_start_cap_per_class: int = 20
         self.active_learning_budget: int = 50

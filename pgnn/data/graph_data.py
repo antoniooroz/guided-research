@@ -286,13 +286,22 @@ class ActiveLearning:
     
     def __init__(self, configuration: Configuration):
         self.configuration = configuration
+        
+        self.dynamic_update = self.configuration.experiment.active_learning_dynamic_update
+        self.dynamic_update_patience = self.configuration.experiment.active_learning_dynamic_update_patience
+        self.update_interval = self.configuration.experiment.active_learning_update_interval
+        
         self.budget = self.configuration.experiment.active_learning_budget
         self.budget_per_update = self.configuration.experiment.active_learning_budget_per_update
+        
         self.selector = self.configuration.experiment.active_learning_selector
         self.network_mode = self.configuration.experiment.active_learning_selector_network_mode
         self.uncertainty_mode = self.configuration.experiment.active_learning_selector_uncertainty_mode
         self.l2_distance_logging = self.configuration.experiment.active_learning_l2_distance_logging
         self.l2_distance_use_centroids = self.configuration.experiment.active_learning_l2_distance_use_centroids
+        
+        self.saved_loss = None
+        self.saved_epoch = 0
     
     def select(self, graph_data: GraphData, active_learning_results: Results):
         idx_active_learning = graph_data.idx_all[Phase.ACTIVE_LEARNING]
@@ -359,12 +368,29 @@ class ActiveLearning:
         
         return l2_distances
             
+    def _should_update(self, epoch: int = 0, loss: float = 0):
+        if self.dynamic_update:
+            if self.saved_loss is None or loss < self.saved_loss:
+                self.saved_loss = loss
+                self.saved_epoch = epoch 
+                return False
+            elif epoch-self.saved_epoch >= self.dynamic_update_patience:
+                self.saved_loss = None
+                self.saved_epoch = 0
+                return True
+            else:
+                return False
+        elif epoch >= self.update_interval and epoch%self.update_interval==0:
+            return True
+        else:
+            return False
             
-    def update(self, graph_data: GraphData, active_learning_results: Results):
-        if self.budget == 0:
+    def update(self, graph_data: GraphData, active_learning_results: Results, epoch: int = 0, loss: float = 0):
+        if self.budget == 0 or not self._should_update(epoch, loss):
             return {
             'mean_l2_distance_in': None,
-            'mean_l2_distance_out': None
+            'mean_l2_distance_out': None,
+            'added_nodes': 0
         }
         
         idx_new_training, idx_new_active_learning, mean_l2_distance_in, mean_l2_distance_out = self.select(graph_data=graph_data, active_learning_results=active_learning_results)
@@ -378,5 +404,6 @@ class ActiveLearning:
         
         return {
             'mean_l2_distance_in': mean_l2_distance_in,
-            'mean_l2_distance_out': mean_l2_distance_out
+            'mean_l2_distance_out': mean_l2_distance_out,
+            'added_nodes': 1
         }

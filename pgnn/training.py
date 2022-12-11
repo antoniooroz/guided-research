@@ -114,20 +114,24 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                     resultsPerPhase[phase] = results
 
                     
-                if configuration.experiment.active_learning and epoch >= configuration.experiment.active_learning_update_interval and epoch%configuration.experiment.active_learning_update_interval==0:
-                    active_learning_update_logs = active_learning.update(graph_data=graph_data, active_learning_results=resultsPerPhase[Phase.ACTIVE_LEARNING])
+                if configuration.experiment.active_learning:
+                    active_learning_update_logs = active_learning.update(
+                        graph_data=graph_data,
+                        active_learning_results=resultsPerPhase[Phase.ACTIVE_LEARNING],
+                        epoch=epoch, 
+                        loss=resultsPerPhase[Phase.TRAINING].networkModeResults[NetworkMode.PROPAGATED].loss
+                    )
                     resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_in = active_learning_update_logs['mean_l2_distance_in']
                     resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_out = active_learning_update_logs['mean_l2_distance_out']
+                    resultsPerPhase[Phase.ACTIVE_LEARNING].info.active_learning_added_nodes = active_learning_update_logs['added_nodes']
 
                 ########################################################################
                 # Logging                                                              #
                 ########################################################################
-                for phase, results in resultsPerPhase.items():
-                    logger.logStep(
-                        phase=phase, 
-                        results=results,
-                        weights=model.log_weights()
-                    )
+                logger.logStep(
+                    results=resultsPerPhase,
+                    weights=model.log_weights()
+                )
                 
                 pbar.set_postfix({'stopping acc': '{:.3f}'.format(resultsPerPhase[Phase.STOPPING].networkModeResults[NetworkMode.PROPAGATED].accuracy)})
                 ########################################################################

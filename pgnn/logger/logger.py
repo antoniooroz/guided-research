@@ -8,19 +8,24 @@ import pgnn.utils.stat_helpers as stat_helpers
 class Logger():
     def __init__(self, configuration: Configuration):
         self.wandb_run = wandb.init(
-            project="Guided Research", entity="tum_daml_ba_antoniooroz",
+            project=configuration.wandb_project, entity=configuration.wandb_entity,
             name=f'{configuration.model.type.name} [{configuration.custom_name}]',
             config=configuration.to_dict(),
             reinit=True
         )
         self.configuration=configuration
-        self.iterations:list[LogStep] = []
+        self.iterations:list[LogIteration] = []
         
     def newIteration(self, seed, iteration):
-        self.iterations.append(LogIteration(configuration=self.configuration, seed=seed, iteration=iteration))
+        self.iterations.append(LogIteration(
+            configuration=self.configuration, 
+            seed=seed, 
+            iteration=iteration,
+            start_step=0 if len(self.iterations)==0 else self.iterations[-1].step
+        ))
         
-    def logStep(self, phase: Phase, results: Results, weights: LogWeight):
-        self.iterations[-1].logStep(phase, results, weights)
+    def logStep(self, results: dict[Phase, Results], weights: LogWeight):
+        self.iterations[-1].logStep(results, weights)
         
     def logEval(self, resultsPerPhase: dict[Phase, Results], weights: LogWeight):
         for phase, results in resultsPerPhase.items():
@@ -71,11 +76,11 @@ class Logger():
     
 
 class LogIteration():
-    def __init__(self, configuration: Configuration, seed, iteration):
+    def __init__(self, configuration: Configuration, seed, iteration, start_step=0):
         self.seed = seed
         self.iteration = iteration
         self.configuration = configuration
-        self.step = 0
+        self.step = start_step
         
         self.log_training = {
             Phase.TRAINING: [],
@@ -92,13 +97,13 @@ class LogIteration():
         
         self.additionalStats=None
         
-    def logStep(self, phase, results, weights):
-        if phase in Phase.training_phases():
-            phase = Phase.TRAINING
-        logStep = LogStep(self.configuration, self.step, 'train', phase, results, weights)
+    def logStep(self, results, weights):
+        for phase, val in results.items():
+            if phase in Phase.training_phases():
+                phase = Phase.TRAINING
+            logStep = LogStep(self.configuration, self.step, 'train', phase, val, weights)
+            self.log_training[phase].append(logStep)
         self.step += 1
-        
-        self.log_training[phase].append(logStep)
         
     def logEval(self, phase, results, weights):
         self.log_evaluation[phase] = LogStep(self.configuration, 0, 'eval', phase, results, weights)
@@ -128,6 +133,7 @@ class LogStep():
             # TODO: Maybe add weights
             wandb.log(
                 data=self.results, 
+                step=step
             )  
         
 

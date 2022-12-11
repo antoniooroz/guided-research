@@ -148,6 +148,7 @@ class Info():
     iteration: int = 0
     mean_l2_distance_in: float = None
     mean_l2_distance_out: float = None
+    active_learning_added_nodes: int = 0
     
     def __add__(self, o):
         return Info(

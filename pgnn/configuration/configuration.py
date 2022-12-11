@@ -11,6 +11,8 @@ class Configuration(BaseConfiguration):
         self.config: list[str] = None
         self.custom_name: str = '<default>'
         self.debug: bool = False
+        self.wandb_entity: str = 'tum_daml_ba_antoniooroz'
+        self.wandb_project: str = 'Guided Research'
         self.load: str = None
         
         self.training: TrainingConfiguration = TrainingConfiguration()
