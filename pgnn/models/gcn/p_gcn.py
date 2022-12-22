@@ -18,7 +18,7 @@ class P_GCN(P_Base):
         self.set_model(GCN(
             nfeatures=nfeatures,
             nclasses=nclasses,
-            config=configuration,
+            configuration=configuration,
             adj_matrix=adj_matrix
             )
         )

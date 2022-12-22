@@ -126,19 +126,19 @@ def _entropy_per_sample(data):
 @uncertainty_metric
 def entropy_per_sample_mean(data):
     entropy_per_sample = _entropy_per_sample(data)
-    return -entropy_per_sample.mean(0).squeeze(0)
+    return entropy_per_sample.mean(0).squeeze(0)
 
 # Range: [0, inf]
 @uncertainty_metric
 def entropy_per_sample_max(data):
     entropy_per_sample = _entropy_per_sample(data)
-    return -entropy_per_sample.max(0).values.squeeze(0)
+    return entropy_per_sample.max(0).values.squeeze(0)
 
 # Range: [0, inf]
 @uncertainty_metric
 def entropy_per_sample_min(data):
     entropy_per_sample = _entropy_per_sample(data)
-    return -entropy_per_sample.min(0).values.squeeze(0)
+    return entropy_per_sample.min(0).values.squeeze(0)
 
 # Range: [0, inf]
 @uncertainty_metric

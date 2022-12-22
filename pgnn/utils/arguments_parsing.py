@@ -26,7 +26,7 @@ def overwrite_with_config_args(args):
     res = {'config': args.config}
     if args.config:
         for config_path in args.config:
-            with open(os.getcwd() + config_path, 'r') as stream:
+            with open(os.getcwd() + '/config/' + config_path + '.yaml', 'r') as stream:
                 parsed_yaml = yaml.safe_load(stream)
                 _parse_dict(res, parsed_yaml)  
     

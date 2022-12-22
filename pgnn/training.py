@@ -92,6 +92,8 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                     start_time_phase = time.time()
                     results = Results()
                     
+                    number_of_nodes = 0
+                    
                     dataloader_phase = Phase.TRAINING if phase in Phase.training_phases() else phase
                     ########################################################################
                     # Training Step                                                        #
@@ -104,11 +106,14 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                         )
                         
                         results += model.step(phase if epoch > 0 else Phase.INIT, data)
+                        number_of_nodes += idx.shape[0]
+                        
                     
                     results.info = Info(
                         duration=time.time() - start_time_phase,
                         seed=seed,
-                        iteration=iteration
+                        iteration=iteration,
+                        number_of_nodes=number_of_nodes
                     )
                     
                     resultsPerPhase[phase] = results

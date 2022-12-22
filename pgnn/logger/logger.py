@@ -13,6 +13,7 @@ class Logger():
             config=configuration.to_dict(),
             reinit=True
         )
+        self.wandb_run.tags = configuration.tags
         self.configuration=configuration
         self.iterations:list[LogIteration] = []
         
@@ -41,11 +42,11 @@ class Logger():
         for column in results_table.columns:
             logs.update(stat_helpers.get_stats_for_column(results_table, column, column))
         
-        logs['results_table'] = results_table
-        
-        wandb.log(logs)
+        wandb.log({**logs, 'results_table': results_table})
         
         self.wandb_run.finish()
+        
+        return logs
         
     def finishIteration(self):
         pass

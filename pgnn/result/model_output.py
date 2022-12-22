@@ -36,9 +36,13 @@ class ModelOutput:
     def cat_list(l: list['ModelOutput']) -> 'ModelOutput':
         model_output = ModelOutput()
         for attr_name in model_output.__dict__.keys():
-            vals = list(filter(lambda x: x is not None, map(lambda x: x.__dict__[attr_name], l)))
+            vals = map(lambda x: x.__dict__[attr_name], l)
+            vals = filter(lambda x: x is not None, vals)
+            vals = list(map(lambda x: x.unsqueeze(0), vals))
             if vals:
-                model_output[attr_name] = torch.cat(vals).to(vals[0].device)
+                model_output.__dict__[attr_name] = torch.cat(vals).to(vals[0].device)
+                
+        return model_output
             
     def pyro_return_sites(self):
         l = []

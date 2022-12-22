@@ -10,6 +10,7 @@ class Configuration(BaseConfiguration):
     def __init__(self, dictionary: dict[str, Any] = None):
         self.config: list[str] = None
         self.custom_name: str = '<default>'
+        self.tags: list[str] = None
         self.debug: bool = False
         self.wandb_entity: str = 'tum_daml_ba_antoniooroz'
         self.wandb_project: str = 'Guided Research'

@@ -9,6 +9,7 @@
 import logging
 
 import wandb
+from pgnn.configuration import experiment_configuration
 from pgnn.configuration.configuration import Configuration
 from pgnn.configuration.experiment_configuration import ExperimentMode
 
@@ -18,9 +19,25 @@ from pgnn.logger import Logger
 from pgnn.data.graph_data import GraphData
 
 import  pgnn.utils.arguments_parsing as arguments_parsing
+import seml
+
+ex = experiment_configuration()
+seml.setup_logger(ex)
+
+@ex.post_run_hook
+def collect_stats(_run):
+    seml.collect_exp_stats(_run)
 
 
-def run():
+@ex.config
+def config():
+    overwrite = None
+    db_collection = None
+    if db_collection is not None:
+        ex.observers.append(seml.create_mongodb_observer(db_collection, overwrite=overwrite))
+    
+@ex.automain
+def run(config:list[str] = None):
     logging.basicConfig(
         format='%(asctime)s: %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S',
@@ -28,6 +45,10 @@ def run():
     
     # Configuration
     args = arguments_parsing.parse_args()
+    
+    if config is not None:
+        args.config = config
+        
     config_dict = arguments_parsing.overwrite_with_config_args(args)
     configuration = Configuration(config_dict)
     
@@ -60,11 +81,6 @@ def run():
             )
             logger.finishIteration()
 
-    logger.finish()
-    
-        
-if __name__ == "__main__":
-    run()
-    
+    return logger.finish()
 
     

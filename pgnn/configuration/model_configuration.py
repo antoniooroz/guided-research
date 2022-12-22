@@ -28,7 +28,7 @@ class ModelConfiguration(BaseConfiguration):
         #self.pred_score: str = 'softmax'
         self.weight_prior: str = 'normal'
         self.guide_init_scale: float = 0.1
-        self.uncertainty_estimation: str = 'entropy_per_sample_mean'
+        self.uncertainty: str = 'entropy_per_sample_mean'
         self.vectorize: bool = True
         self.network_mode_uncertainty_aggregation_network_lambda: float = 0.5
         self.network_mode_uncertainty_aggregation_normalize: bool = False
@@ -80,7 +80,7 @@ class ModelType(Enum):
         return [ModelType.P_GAT, ModelType.P_ATT_GAT, ModelType.MIXED_GAT, ModelType.MIXED_ATT_GAT]
     
     def mcds() -> list['ModelType']:
-        return [ModelType.MCD_PPNP]
+        return [ModelType.MCD_PPNP, ModelType.MCD_GCN, ModelType.MCD_GAT]
     
     def get_base_type(model_type: 'ModelType') -> 'ModelType':
         if model_type == ModelType.MCD_PPNP:

@@ -1,6 +1,6 @@
 model:
   type: MCD_GAT
-  samples_training: 3
+  samples_training: 1
   initial_var: 1
   guide_init_scale: 0.1
   uncertainty: variance_between_samples_per_class_summed
@@ -11,4 +11,4 @@ training:
     TRAINING: 0.03
   reg_lambda: 
     TRAINING: 0.0005
-  drop_prob: 0
+  drop_prob: 0.5

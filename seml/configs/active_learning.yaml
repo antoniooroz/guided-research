@@ -1,0 +1,21 @@
+seml:
+  executable: run.py
+  name: Active_Learning
+  output_dir: seml/logs
+  project_root_dir: ../../
+
+slurm:
+  experiments_per_job: 1
+  max_simultaneous_jobs: 4  # Restrict number of simultaneously running jobs per job array
+  sbatch_options:
+    gres: gpu:1       # num GPUs
+    mem: 16G          # memory
+    cpus-per-task: 2  # num cores
+    time: 0-08:00     # max time, D-HH:MM
+
+###### BEGIN PARAMETER CONFIGURATION ######
+
+grid:
+  config:
+    - ["models/mcd_ppnp", "modes/sbm/train/active_learning_6", "active_learning/uncertainty_isolated_epistemic", "debug"]
+    - ["models/mcd_ppnp", "modes/sbm/train/active_learning_6", "active_learning/uncertainty_isolated_aleatoric", "debug"]

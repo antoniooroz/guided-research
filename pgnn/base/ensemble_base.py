@@ -4,8 +4,6 @@ from pgnn.base.network_mode import NetworkMode
 
 from pgnn.configuration.configuration import Configuration
 from pgnn.configuration.model_configuration import ModelType
-from pgnn.configuration.training_configuration import Phase
-from pgnn.data.data import Data
 from pgnn.data.model_input import ModelInput
 from pgnn.result.model_output import ModelOutput
 import pgnn.base.uncertainty_estimation as UE
@@ -16,7 +14,7 @@ from .base import Base
 import pgnn.base.uncertainty_estimation as UE
 
 
-class MCD_Base(Base):
+class Ensemble_Base(Base):
     def __init__(self, nfeatures: int, nclasses: int, configuration: Configuration):
         super().__init__()
         self.nfeatures = nfeatures
@@ -34,16 +32,13 @@ class MCD_Base(Base):
         }
         model_outputs: dict[NetworkMode, ModelOutput] = {}
         
-        if self.training:
-            nsamples = self.configuration.model.samples_training 
-        else:
-            nsamples = self.configuration.model.samples_prediction
+        nsamples = self.configuration.model.samples_training        
         
         # Generate Samples
         for _ in range(nsamples):
             output_per_mode = self.forward(model_input)
             for key in model_output_samples.keys():
-                model_output_samples[key].append(output_per_mode[key])
+                model_output_samples[key].append(output_per_mode[key].unsqueeze(0))
         
         # Accumulate samples and calculate outputs
         for key in model_output_samples.keys():
@@ -88,7 +83,7 @@ class MCD_Base(Base):
         
     def log_weights(self):
         return self.model.log_weights()
-    
+
     def eval(self):
         """
         Adapted from https://discuss.pytorch.org/t/using-dropout-in-evaluation-mode/27721
@@ -96,7 +91,7 @@ class MCD_Base(Base):
         """
         super().eval()
         # is_mcd because DropEdge also uses MCD base class but doesn't utilize normal dropout in eval
-        if self.configuration.model.type in ModelType.mcds():
+        if self.configuration.model in ModelType.mcds():
             for m in self.model.modules():
                 if m.__class__.__name__.startswith('Dropout'):
                     m.train()

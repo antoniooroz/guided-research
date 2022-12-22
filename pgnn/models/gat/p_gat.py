@@ -22,7 +22,7 @@ class P_GAT(P_Base):
         self.set_model(GAT(
             nfeatures=nfeatures,
             nclasses=nclasses,
-            config=configuration,
+            configuration=configuration,
             adj_matrix=adj_matrix
             )
         )

@@ -80,7 +80,7 @@ class P_Base(Base):
             model_output.predicted_classes = max_probabilities.indices
             model_output.epistemic_uncertainties = UE.get_uncertainty(
                 configuration=self.configuration, 
-                uncertainty_metric=self.configuration.model.uncertainty_estimation, probs_all=all_softmax_scores, 
+                uncertainty_metric=self.configuration.model.uncertainty, probs_all=all_softmax_scores, 
                 probs_mean=mean_softmax_scores, 
                 preds=max_probabilities.indices
             )

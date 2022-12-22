@@ -146,6 +146,7 @@ class Info():
     duration: float = 0.0
     seed: int = 0
     iteration: int = 0
+    number_of_nodes: int = 0
     mean_l2_distance_in: float = None
     mean_l2_distance_out: float = None
     active_learning_added_nodes: int = 0
@@ -155,6 +156,7 @@ class Info():
             duration=self.duration + o.duration,
             seed=self.seed,
             iteration=self.iteration,
+            number_of_nodes=self.number_of_nodes+o.number_of_nodes,
             mean_l2_distance_in = self.mean_l2_distance_in,
             mean_l2_distance_out = self.mean_l2_distance_out
         )
