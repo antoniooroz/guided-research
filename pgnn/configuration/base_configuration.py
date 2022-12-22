@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any
 
-def _parse_dict(default_dictionary: dict[Any, Any], given_dictionary: dict[str, Any]):
+def _parse_dict(default_dictionary, given_dictionary):
     key_list = list(default_dictionary)
     val_list = list(default_dictionary.values())
     
