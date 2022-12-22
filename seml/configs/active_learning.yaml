@@ -17,5 +17,7 @@ slurm:
 
 grid:
   config:
-    - ["models/mcd_ppnp", "modes/sbm/train/active_learning_6", "active_learning/uncertainty_isolated_epistemic", "debug"]
-    - ["models/mcd_ppnp", "modes/sbm/train/active_learning_6", "active_learning/uncertainty_isolated_aleatoric", "debug"]
+    type: choice
+    options:
+      - ["models/mcd_ppnp", "modes/sbm/train/active_learning_6", "active_learning/uncertainty_isolated_epistemic", "debug"]
+      - ["models/mcd_ppnp", "modes/sbm/train/active_learning_6", "active_learning/uncertainty_isolated_aleatoric", "debug"]
