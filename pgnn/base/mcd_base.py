@@ -80,11 +80,30 @@ class MCD_Base(Base):
     
     def load_model(self, mode: ModelType, name: str, seed: int, iter: int):
         self.model.load_model(
-            mode=ModelType.get_base_type(mode),
+            mode=ModelType.get_base_type(mode, self.configuration.model.load_mcd_from_base_model),
             name=name,
             seed=seed,
             iter=iter
         )
+        
+    def save_model(self, custom_state_dict = None):
+        self.model.save_model(custom_state_dict)
+        
+    def init(self, pytorch_seed, model_name, iteration, data_seed):
+        super().init(pytorch_seed=pytorch_seed, model_name=model_name, iteration=iteration, data_seed=data_seed)
+        self.model.init(pytorch_seed=pytorch_seed, model_name=model_name, iteration=iteration, data_seed=data_seed)
+        
+    def load_custom_state_dict(self, state_dict):
+        self.init(
+            pytorch_seed=state_dict["torch_seed"], 
+            model_name=state_dict["model_name"],
+            iteration=state_dict["iteration"], 
+            data_seed=state_dict["data_seed"]
+        )
+        self.model.load_custom_state_dict(state_dict)
+        
+    def custom_state_dict(self):
+        return self.model.custom_state_dict()
         
     def log_weights(self):
         return self.model.log_weights()

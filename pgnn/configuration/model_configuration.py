@@ -8,6 +8,7 @@ class ModelConfiguration(BaseConfiguration):
         self.type: ModelType = ModelType.PPNP
         self.bias: bool = False
         self.hidden_layer_size: list[int] = [64]
+        self.load_mcd_from_base_model = False
         
         # GAT
         self.gat_hidden_layers_heads: list[int] = [8]
@@ -74,16 +75,25 @@ class ModelType(Enum):
     
     # TODO ...    
     def gat_bayesian_projection() -> list['ModelType']:
+        raise NotImplementedError()
         return [ModelType.P_GAT, ModelType.P_PROJ_GAT, ModelType.MIXED_GAT, ModelType.MIXED_PROJ_GAT]
 
     def gat_bayesian_attention() -> list['ModelType']:
+        raise NotImplementedError()
         return [ModelType.P_GAT, ModelType.P_ATT_GAT, ModelType.MIXED_GAT, ModelType.MIXED_ATT_GAT]
     
     def mcds() -> list['ModelType']:
         return [ModelType.MCD_PPNP, ModelType.MCD_GCN, ModelType.MCD_GAT]
     
-    def get_base_type(model_type: 'ModelType') -> 'ModelType':
-        if model_type == ModelType.MCD_PPNP:
+    def get_base_type(model_type: 'ModelType', load_mcd_from_base_model=False) -> 'ModelType':
+        if not load_mcd_from_base_model:
+            return model_type
+        elif model_type == ModelType.MCD_PPNP:
             return ModelType.PPNP
+        elif model_type == ModelType.MCD_GCN:
+            return ModelType.GCN
+        elif model_type == ModelType.MCD_GAT:
+            raise NotImplementedError()
+            return ModelType.GAT
         else:
             raise NotImplementedError()

@@ -14,7 +14,7 @@ class Logger():
             reinit=True
         )
         self.wandb_run.tags = configuration.tags
-        self.configuration=configuration
+        self.configuration = configuration
         self.iterations:list[LogIteration] = []
         
     def newIteration(self, seed, iteration):

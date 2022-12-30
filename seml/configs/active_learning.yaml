@@ -19,5 +19,28 @@ grid:
   config:
     type: choice
     options:
-      - ["models/mcd_ppnp", "modes/sbm/train/active_learning_6", "active_learning/uncertainty_isolated_epistemic", "debug"]
-      - ["models/mcd_ppnp", "modes/sbm/train/active_learning_6", "active_learning/uncertainty_isolated_aleatoric", "debug"]
+      - ["models/ppnp", "modes/sbm/train/active_learning_7"]
+      - ["models/mcd_ppnp", "modes/sbm/train/active_learning_7"]
+      - ["models/gcn", "modes/sbm/train/active_learning_7"]
+      - ["models/mcd_gcn", "modes/sbm/train/active_learning_7"]
+  overrides.training.learning_rate.TRAINING:
+    type: choice
+    options:
+      - 0.1
+      - 0.03
+      - 0.01
+      - 0.003
+  overrides.training.reg_lambda.TRAINING:
+    type: choice
+    options:
+      - 0.0
+      - 0.001
+      - 0.0003
+      - 0.0001
+  overrides.training.drop_prob:
+    type: choice
+    options:
+      - 0.0
+      - 0.25
+      - 0.5
+      - 0.75

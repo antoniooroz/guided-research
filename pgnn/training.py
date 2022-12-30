@@ -39,6 +39,8 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
 
     # Torch Seed and Logging
     logging.log(21, f"Training Model: {configuration.model.type.name}")
+    logging.log(22, f"Seed: {seed}")
+    logging.log(22, f"Seed-Iteration: {iteration}")
     torch_seed = gen_seeds()
     torch.manual_seed(seed=torch_seed) # TODO: Maybe make reproducible aswell
     logging.log(22, f"PyTorch seed: {torch_seed}")

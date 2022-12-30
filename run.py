@@ -8,7 +8,7 @@
 
 import logging
 
-import wandb
+from sacred import Experiment
 from pgnn.configuration import experiment_configuration
 from pgnn.configuration.configuration import Configuration
 from pgnn.configuration.experiment_configuration import ExperimentMode
@@ -21,7 +21,7 @@ from pgnn.data.graph_data import GraphData
 import  pgnn.utils.arguments_parsing as arguments_parsing
 import seml
 
-ex = experiment_configuration()
+ex = Experiment()
 seml.setup_logger(ex)
 
 @ex.post_run_hook
@@ -37,7 +37,7 @@ def config():
         ex.observers.append(seml.create_mongodb_observer(db_collection, overwrite=overwrite))
     
 @ex.automain
-def run(config:list[str] = None):
+def run(config:list[str] = None, overrides = None):
     logging.basicConfig(
         format='%(asctime)s: %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S',
@@ -50,6 +50,7 @@ def run(config:list[str] = None):
         args.config = config
         
     config_dict = arguments_parsing.overwrite_with_config_args(args)
+    arguments_parsing.parse_dict(config_dict, overrides)
     configuration = Configuration(config_dict)
     
     # TEST mode warning
