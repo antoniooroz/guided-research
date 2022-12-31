@@ -44,12 +44,7 @@ def run(config:list[str] = None, overrides = None):
         level=logging.INFO + 2)
     
     # Configuration
-    args = arguments_parsing.parse_args()
-    
-    if config is not None:
-        args.config = config
-        
-    config_dict = arguments_parsing.overwrite_with_config_args(args)
+    config_dict = arguments_parsing.overwrite_with_config_args(config)
     arguments_parsing.parse_dict(config_dict, overrides)
     configuration = Configuration(config_dict)
     

@@ -24,11 +24,11 @@ def parse_dict(res, dictionary):
         else:
             res[key] = val
 
-def overwrite_with_config_args(args):
+def overwrite_with_config_args(config):
     # Load config from yaml if available
-    res = {'config': args.config}
-    if args.config:
-        for config_path in args.config:
+    res = {'config': config}
+    if config:
+        for config_path in config:
             with open(os.getcwd() + '/config/' + config_path + '.yaml', 'r') as stream:
                 parsed_yaml = yaml.safe_load(stream)
                 parse_dict(res, parsed_yaml)  
