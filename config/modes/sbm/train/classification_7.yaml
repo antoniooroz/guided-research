@@ -39,4 +39,4 @@ experiment:
 training:
   ood_eval_during_training: False
   patience: 
-    TRAINING: 1000
+    TRAINING: 200
