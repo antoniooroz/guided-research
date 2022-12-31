@@ -81,7 +81,7 @@ class GraphData:
         if self.experiment_configuration.dataset == Dataset.GENERATED_SBM:
             self.graph = SBM.init(self, seed)
         
-        self.plot_tsne(seed, self.graph.attr_matrix, self.graph.labels)
+        #self.plot_tsne(seed, self.graph.attr_matrix, self.graph.labels)
     
     def log_feature_distances(self, means):
         print('Feature Mean Distances:')
