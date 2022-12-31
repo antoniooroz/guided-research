@@ -19,10 +19,10 @@ grid:
   config:
     type: choice
     options:
-      - ["models/ppnp", "modes/sbm/train/active_learning_7"]
-      - ["models/mcd_ppnp", "modes/sbm/train/active_learning_7"]
-      - ["models/gcn", "modes/sbm/train/active_learning_7"]
-      - ["models/mcd_gcn", "modes/sbm/train/active_learning_7"]
+      - ["models/ppnp", "modes/sbm/train/classification_7"]
+      - ["models/mcd_ppnp", "modes/sbm/train/classification_7"]
+      - ["models/gcn", "modes/sbm/train/classification_7"]
+      - ["models/mcd_gcn", "modes/sbm/train/classification_7"]
   overrides.training.learning_rate.TRAINING:
     type: choice
     options:
