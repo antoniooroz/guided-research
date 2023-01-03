@@ -19,10 +19,14 @@ grid:
   config:
     type: choice
     options:
-      - ["models/ppnp", "modes/sbm/train/classification_7"]
-      - ["models/mcd_ppnp", "modes/sbm/train/classification_7"]
-      - ["models/gcn", "modes/sbm/train/classification_7"]
-      - ["models/mcd_gcn", "modes/sbm/train/classification_7"]
+      - ["models/ppnp", "modes/sbm/train/classification_7_sv3"]
+      - ["models/mcd_ppnp", "modes/sbm/train/classification_7_sv3"]
+      - ["models/gcn", "modes/sbm/train/classification_7_sv3"]
+      - ["models/mcd_gcn", "modes/sbm/train/classification_7_sv3"]
+      - ["models/ppnp", "modes/sbm/train/classification_7_sv10"]
+      - ["models/mcd_ppnp", "modes/sbm/train/classification_7_sv10"]
+      - ["models/gcn", "modes/sbm/train/classification_7_sv10"]
+      - ["models/mcd_gcn", "modes/sbm/train/classification_7_sv10"]
   overrides.training.learning_rate.TRAINING:
     type: choice
     options:
