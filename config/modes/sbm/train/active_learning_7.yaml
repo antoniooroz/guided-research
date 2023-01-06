@@ -4,7 +4,7 @@ tags: ['active_learning_7_v1']
 experiment:
 
   seeds:
-    end: 10
+    end: 6
   iterations_per_seed: 3
 
   dataset: GENERATED_SBM
