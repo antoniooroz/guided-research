@@ -34,3 +34,13 @@ def overwrite_with_config_args(config):
                 parse_dict(res, parsed_yaml)  
     
     return res
+
+def seml_config_parsing(config):
+    if isinstance(config, dict):
+        new_config = []
+        
+        for val in config.values():
+            new_config += val
+            
+        config = new_config
+    return config

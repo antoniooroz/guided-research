@@ -37,13 +37,14 @@ def config():
         ex.observers.append(seml.create_mongodb_observer(db_collection, overwrite=overwrite))
     
 @ex.automain
-def run(config:list[str] = None, overrides = None):
+def run(config = None, overrides = None):
     logging.basicConfig(
         format='%(asctime)s: %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S',
         level=logging.INFO + 2)
     
     # Configuration
+    config = arguments_parsing.seml_config_parsing(config)
     config_dict = arguments_parsing.overwrite_with_config_args(config)
     arguments_parsing.parse_dict(config_dict, overrides)
     configuration = Configuration(config_dict)
