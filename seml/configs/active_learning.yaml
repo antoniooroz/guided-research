@@ -38,7 +38,6 @@ grid:
     type: choice
     options:
       - 10
-      - 30
   overrides.experiment.active_learning_starting_class:
     type: choice
     options:
