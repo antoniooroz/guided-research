@@ -63,7 +63,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
             iter=iteration
         )
         
-    logger.watch(model)
+    #logger.watch(model)
     
     pyro.clear_param_store()
     
