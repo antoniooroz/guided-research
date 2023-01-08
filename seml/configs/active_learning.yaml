@@ -28,12 +28,15 @@ grid:
   config.3:
     type: choice
     options:
-      - ["active_learning/uncertainty_isolated_epistemic"]
-      - ["active_learning/uncertainty_propagated_epistemic"]
+      - ["active_learning/l2_distance_centroid"]
+      - ["active_learning/l2_distance"]
+      - ["active_learning/random"]
+      - ["active_learning/uncertainty_isolated_aleatoric"]
+      - ["active_learning/uncertainty_propagated_aleatoric"]
   overrides.experiment.sbm_feature_sampling_variance:
     type: choice
     options:
-      - 10
+      - 30
   overrides.experiment.active_learning_starting_class:
     type: choice
     options:
