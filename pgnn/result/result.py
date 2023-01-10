@@ -27,24 +27,44 @@ class NetworkModeResult:
         labels = data.labels.cpu().detach().numpy() if data else None
         ood_indicators = data.ood_indicators.cpu().detach().numpy() if data else None
         
+        self.datapoints_correct_per_class = []
+        self.datapoints_false_per_class = []
+        
+        self.ood_datapoints_correct_per_class = []
+        self.ood_datapoints_false_per_class = []
+        
         if predicted_classes is not None and data:
             correct_datapoint_indicator = (predicted_classes==labels)
+            
             self.datapoints_correct: int = correct_datapoint_indicator[ood_indicators==0].sum().item()
             self.datapoints_false: int = (~correct_datapoint_indicator)[ood_indicators==0].sum().item()
             
-            if ood_indicators.sum().item() > 0:
-                # sum of empty tensor is buggy on MPS, therefore check if tensors will be empty
-                self.ood_datapoints_correct: int = correct_datapoint_indicator[ood_indicators==1].sum().item()
-                self.ood_datapoints_false: int = (~correct_datapoint_indicator)[ood_indicators==1].sum().item()
-            else:
-                self.ood_datapoints_correct: int = 0
-                self.ood_datapoints_false: int = 0
+            self.ood_datapoints_correct: int = correct_datapoint_indicator[ood_indicators==1].sum().item()
+            self.ood_datapoints_false: int = (~correct_datapoint_indicator)[ood_indicators==1].sum().item()
+            
+            for c in range(configuration.experiment.num_classes):
+                in_class = predicted_classes==c
+                correct_indicator_per_class = in_class * correct_datapoint_indicator
+                false_indicator_per_class = in_class * (~correct_datapoint_indicator)
+                
+                self.datapoints_correct_per_class.append(correct_indicator_per_class[ood_indicators==0].sum().item())
+                self.datapoints_false_per_class.append(false_indicator_per_class[ood_indicators==0])
+                
+                self.ood_datapoints_correct_per_class.append(correct_indicator_per_class[ood_indicators==1].sum().item())
+                self.ood_datapoints_false_per_class.append(false_indicator_per_class[ood_indicators==1].sum().item())
         else:
             self.datapoints_correct: int = 0
             self.datapoints_false: int = 0
             
             self.ood_datapoints_correct: int = 0
             self.ood_datapoints_false: int = 0
+            
+            for c in range(configuration.experiment.num_classes):
+                self.datapoints_correct_per_class.append(0)
+                self.datapoints_false_per_class.append(0)
+                
+                self.ood_datapoints_correct_per_class.append(0)
+                self.ood_datapoints_false_per_class.append(0)
         
         if loss_unnormalized:
             self._loss_unnormalized = loss_unnormalized
@@ -56,10 +76,8 @@ class NetworkModeResult:
         self._ood_auc_roc_aleatoric: float = None
         self._ood_auc_roc_epistemic: float = None
         
-        self.datapoints_per_class = Counter()
-        if labels is not None and configuration is not None:
-            for c in range(configuration.experiment.num_classes):
-                self.datapoints_per_class[c] = (labels == c).sum()
+        self._datapoints_per_class = None
+        self._ood_datapoints_per_class = None
 
     @property
     def datapoints(self) -> int:
@@ -105,6 +123,46 @@ class NetworkModeResult:
             self._ood_auc_roc_epistemic = self._roc_auc_score(self._ood_indicators, self._epistemic_uncertainties)
         return self._ood_auc_roc_epistemic
     
+    @property
+    def datapoints_per_class(self) -> list[float]:
+        if self._datapoints_per_class is not None:
+            return self._datapoints_per_class
+        
+        datapoints_per_class = []
+        for corrects, wrongs in zip(self.datapoints_correct_per_class, self.datapoints_false_per_class):
+            datapoints_per_class.append(corrects + wrongs)
+        
+        self._datapoints_per_class = datapoints_per_class    
+        return self._datapoints_per_class
+    
+    @property
+    def ood_datapoints_per_class(self) -> list[float]:
+        if self._ood_datapoints_per_class is not None:
+            return self._ood_datapoints_per_class
+        
+        ood_datapoints_per_class = []
+        for corrects, wrongs in zip(self.ood_datapoints_correct_per_class, self.ood_datapoints_false_per_class):
+            ood_datapoints_per_class.append(corrects + wrongs)
+            
+        self._ood_datapoints_per_class = ood_datapoints_per_class
+        return self._ood_datapoints_per_class
+    
+    @property
+    def ood_accuracy_per_class(self) -> list[float]:
+        accuracy_per_class = []
+        for corrects, datapoints in zip(self.ood_datapoints_correct_per_class, self.ood_datapoints_per_class):
+            accuracy_per_class.append(corrects / (datapoints + 1e-9))
+        
+        return accuracy_per_class
+    
+    @property
+    def accuracy_per_class(self) -> list[float]:
+        accuracy_per_class = []
+        for corrects, datapoints in zip(self.datapoints_correct_per_class, self.datapoints_per_class):
+            accuracy_per_class.append(corrects / (datapoints + 1e-9))
+            
+        return accuracy_per_class
+    
     def __add__(self, o: 'NetworkModeResult'):
         result: NetworkModeResult = NetworkModeResult(
             model_output=None,
@@ -121,7 +179,11 @@ class NetworkModeResult:
         
         result._ood_indicators = np.concatenate([self._ood_indicators, o._ood_indicators])
         
-        result.datapoints_per_class = self.datapoints_per_class + o.datapoints_per_class
+        result.datapoints_correct_per_class = list(map(lambda x: x[0]+x[1], self.datapoints_correct_per_class, o.datapoints_correct_per_class))
+        result.datapoints_false_per_class = list(map(lambda x: x[0]+x[1], self.datapoints_false_per_class, o.datapoints_false_per_class))
+        
+        result.ood_datapoints_correct_per_class = list(map(lambda x: x[0]+x[1], self.ood_datapoints_correct_per_class, o.ood_datapoints_correct_per_class))
+        result.ood_datapoints_false_per_class = list(map(lambda x: x[0]+x[1], self.ood_datapoints_false_per_class, o.ood_datapoints_false_per_class))
         
         return result
     
