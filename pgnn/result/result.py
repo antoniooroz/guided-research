@@ -43,12 +43,12 @@ class NetworkModeResult:
             self.ood_datapoints_false: int = (~correct_datapoint_indicator)[ood_indicators==1].sum().item()
             
             for c in range(configuration.experiment.num_classes):
-                in_class = predicted_classes==c
+                in_class = labels==c
                 correct_indicator_per_class = in_class * correct_datapoint_indicator
                 false_indicator_per_class = in_class * (~correct_datapoint_indicator)
                 
                 self.datapoints_correct_per_class.append(correct_indicator_per_class[ood_indicators==0].sum().item())
-                self.datapoints_false_per_class.append(false_indicator_per_class[ood_indicators==0])
+                self.datapoints_false_per_class.append(false_indicator_per_class[ood_indicators==0].sum().item())
                 
                 self.ood_datapoints_correct_per_class.append(correct_indicator_per_class[ood_indicators==1].sum().item())
                 self.ood_datapoints_false_per_class.append(false_indicator_per_class[ood_indicators==1].sum().item())
@@ -195,11 +195,15 @@ class NetworkModeResult:
         
         for prop in dir(self):
             if not prop.startswith('_') and prop != 'model_output':
-                if isinstance(getattr(self, prop), dict):
-                    for key, val in getattr(self, prop).items():
+                prop_val = getattr(self, prop)
+                if isinstance(prop_val, dict):
+                    for key, val in prop_val.items():
                         result[f"{prefix}{prop}_{key}"] = val
+                elif isinstance(prop_val, list):
+                    for index, val in enumerate(prop_val):
+                        result[f"{prefix}{prop}_{index}"] = val
                 else:
-                    result[f"{prefix}{prop}"] = getattr(self, prop)
+                    result[f"{prefix}{prop}"] = prop_val
     
         return result
     
