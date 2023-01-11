@@ -38,4 +38,4 @@ grid:
   overrides.experiment.sbm_feature_sampling_variance:
     type: choice
     options:
-      - 30
+      - 3
