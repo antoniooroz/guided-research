@@ -1,5 +1,5 @@
 custom_name: active_learning
-tags: ['active_learning_7_h4_v1_3']
+tags: ['active_learning_7_h4_v1_3_fd20']
 
 experiment:
 
@@ -20,7 +20,7 @@ experiment:
   
   sbm_nfeatures: 10
   sbm_feature_mean: 0
-  sbm_feature_variance: 1
+  sbm_feature_variance: 20
   sbm_feature_sampling_variance: 10
   
   active_learning: True

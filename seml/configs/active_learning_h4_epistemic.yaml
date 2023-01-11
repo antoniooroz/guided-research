@@ -24,7 +24,9 @@ grid:
   config.2:
     type: choice
     options:
-      - ["modes/sbm/train/active_learning_7_h4"]
+      - ["modes/sbm/train/active_learning_7_h4_df05"]
+      - ["modes/sbm/train/active_learning_7_h4_df10"]
+      - ["modes/sbm/train/active_learning_7_h4_df20"]
   config.3:
     type: choice
     options:
