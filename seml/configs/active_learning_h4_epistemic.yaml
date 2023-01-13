@@ -24,15 +24,11 @@ grid:
   config.2:
     type: choice
     options:
-      - ["modes/sbm/train/active_learning_7_h4_df05"]
-      - ["modes/sbm/train/active_learning_7_h4_df10"]
-      - ["modes/sbm/train/active_learning_7_h4_df20"]
+      - ["modes/sbm/train/active_learning_7_h4_fd30_var03"]
+      - ["modes/sbm/train/active_learning_7_h4_fd30_var10"]
+      - ["modes/sbm/train/active_learning_7_h4_fd30_var30"]
   config.3:
     type: choice
     options:
       - ["active_learning/uncertainty_isolated_epistemic"]
       - ["active_learning/uncertainty_propagated_epistemic"]
-  overrides.experiment.sbm_feature_sampling_variance:
-    type: choice
-    options:
-      - 3
