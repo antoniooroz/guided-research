@@ -26,13 +26,10 @@ grid:
   config.2:
     type: choice
     options:
-      - ["modes/sbm/train/active_learning_7_h4_fd30_var03"]
-      - ["modes/sbm/train/active_learning_7_h4_fd30_var10"]
-      - ["modes/sbm/train/active_learning_7_h4_fd30_var30"]
+      - ["modes/cora/train/active_learning_h4"]
   config.3:
     type: choice
     options:
-      - ["active_learning/l2_distance_centroid"]
       - ["active_learning/l2_distance"]
       - ["active_learning/random"]
       - ["active_learning/uncertainty_isolated_aleatoric"]
