@@ -385,13 +385,15 @@ class ActiveLearning:
         else:
             return False
             
-    def update(self, graph_data: GraphData, active_learning_results: Results, epoch: int = 0, loss: float = 0):
+    def update(self, graph_data: GraphData, active_learning_results: Results, epoch: int = 0, loss: float = 0, early_stopping = None, training_phase = None):
         if self.budget == 0 or not self._should_update(epoch, loss):
             return {
-            'mean_l2_distance_in': None,
-            'mean_l2_distance_out': None,
-            'added_nodes': 0
-        }
+                'mean_l2_distance_in': None,
+                'mean_l2_distance_out': None,
+                'added_nodes': 0
+            }
+        
+        early_stopping.load_best()
         
         idx_new_training, idx_new_active_learning, mean_l2_distance_in, mean_l2_distance_out = self.select(graph_data=graph_data, active_learning_results=active_learning_results)
         
@@ -401,6 +403,13 @@ class ActiveLearning:
         graph_data.init_dataloaders()
         
         self.budget = max(0, self.budget - self.budget_per_update)
+        
+        early_stopping.init_for_training_phase(
+            enabled=graph_data.configuration.training.early_stopping[training_phase],
+            patience=graph_data.configuration.training.patience[training_phase],
+            max_epochs=graph_data.configuration.training.max_epochs[training_phase],
+            reset_best=True
+        )
         
         return {
             'mean_l2_distance_in': mean_l2_distance_in,

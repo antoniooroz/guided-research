@@ -11,10 +11,11 @@ from typing import Union
 from pathlib import Path
 import numpy as np
 import scipy.sparse as sp
+import os
 
 from .sparsegraph import SparseGraph
 
-data_dir = Path(__file__).parent
+data_dir = f"{os.getcwd()}/grub/datasets"
 
 
 def load_from_npz(file_name: str) -> SparseGraph:

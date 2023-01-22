@@ -126,8 +126,11 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                         graph_data=graph_data,
                         active_learning_results=resultsPerPhase[Phase.ACTIVE_LEARNING],
                         epoch=epoch, 
-                        loss=resultsPerPhase[Phase.TRAINING].networkModeResults[NetworkMode.PROPAGATED].loss
+                        loss=resultsPerPhase[Phase.TRAINING].networkModeResults[NetworkMode.PROPAGATED].loss,
+                        early_stopping=early_stopping,
+                        training_phase=training_phase
                     )
+                    
                     resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_in = active_learning_update_logs['mean_l2_distance_in']
                     resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_out = active_learning_update_logs['mean_l2_distance_out']
                     resultsPerPhase[Phase.ACTIVE_LEARNING].info.active_learning_added_nodes = active_learning_update_logs['added_nodes']
