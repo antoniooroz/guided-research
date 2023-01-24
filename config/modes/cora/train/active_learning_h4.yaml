@@ -1,5 +1,5 @@
 custom_name: active_learning
-tags: ['active_learning_cora_h4_v1']
+tags: ['active_learning_cora_h4_v2']
 
 experiment:
 
@@ -8,9 +8,9 @@ experiment:
   iterations_per_seed: 3
 
   dataset: CORA_ML
-  datapoints_training_per_class: 50
+  datapoints_training_per_class: 60
   datapoints_stopping: 300
-  datapoints_known: 1500
+  datapoints_known: 1200
   num_classes: 7
   
   sbm_nfeatures: 10
@@ -21,7 +21,7 @@ experiment:
   active_learning: True
   active_learning_start_cap_per_class: 20
   active_learning_update_interval: 600
-  active_learning_budget_per_update: 10
+  active_learning_budget_per_update: 30
   active_learning_budget: 10
   active_learning_starting_class: [0,1,2,3,4,5]
   active_learning_selector: UNCERTAINTY
