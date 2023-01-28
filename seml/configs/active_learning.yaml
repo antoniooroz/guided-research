@@ -26,7 +26,7 @@ grid:
   config.2:
     type: choice
     options:
-      - ["modes/cora/train/active_learning_h2"]
+      - ["modes/cora/train/active_learning_h2_retrain"]
   config.3:
     type: choice
     options:
@@ -39,5 +39,4 @@ grid:
     options:
       - [0]
       - [0, 1, 2]
-      - [0, 1, 2, 3, 4, 5]
       - [0, 1, 2, 3, 4, 5, 6]

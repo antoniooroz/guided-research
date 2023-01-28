@@ -29,6 +29,7 @@ class EarlyStopping:
         self.model = model
         self.stop_variable = stop_variable
         self.best = SavedState()
+        self.first = SavedState(state_dict=self.model.custom_state_dict(), value=0, epoch=0)
         
     def init_for_training_phase(self, enabled: bool = True, patience: int = 100, max_epochs: int = 1000, reset_best = False):
         self.enabled = enabled
@@ -57,4 +58,8 @@ class EarlyStopping:
     def load_best(self):
         if self.enabled:
             self.model.load_custom_state_dict(self.best.state_dict)
+    
+    def load_first(self):
+        if self.enabled:
+            self.model.load_custom_state_dict(self.first.state_dict)
         
