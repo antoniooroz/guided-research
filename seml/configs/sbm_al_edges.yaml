@@ -19,7 +19,7 @@ grid:
   config.1:
     type: choice
     options:
-      - ["models/sbm/ppnp"]
+      - ["models/sbm/gcn"]
   config.2:
     type: choice
     options:
@@ -33,4 +33,4 @@ grid:
   overrides.tags:
     type: choice
     options:
-      - ['classification_sbmal_edges_v1']
+      - ['classification_sbmal_edges_v2']

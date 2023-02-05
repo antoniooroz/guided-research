@@ -298,27 +298,28 @@ class SBM_AL:
             selfloops=False,
             sparse=True
         )
+        """
+        https://networkx.org/documentation/stable/auto_examples/drawing/plot_labels_and_colors.html"""
         
-        """https://networkx.org/documentation/stable/auto_examples/drawing/plot_labels_and_colors.html"""
         
         """
-        options = {"edgecolors": "tab:gray", "node_size": 25, "alpha": 1}
+        options = {"edgecolors": "tab:gray", "node_size": 100, "alpha": 1}
         
         plt.figure(figsize=(12, 10))
         spring_k =4/sqrt(sum(graph_data.experiment_configuration.sbm_classes)) # default k is 1/sqrt
         pos = nx.spring_layout(networkx_graph, seed=seed, scale=1, k=spring_k)
         
         i = 0
-        colors = ["green", "blue", "cyan", "red"]
+        colors = (["#00A8E8"] * 2) + (["#003459"]*2) + (["#F45B69"] * 2) + (["#5A0001"] * 2) + (["#C3FFD7"] * 2) + (["#0C8346"] * 2)
         for sbm_class, color in zip(graph_data.experiment_configuration.sbm_classes, colors):
-            nx.draw_networkx_nodes(networkx_graph, pos, nodelist=range(i, i+sbm_class), node_color=f"tab:{color}", **options)
+            nx.draw_networkx_nodes(networkx_graph, pos, nodelist=range(i, i+sbm_class), node_color=color, **options)
             i+=sbm_class
         
         nx.draw_networkx_edges(networkx_graph, pos, width=0.5, alpha=0.5)
         
         plt.tight_layout()
         plt.legend()
-        plt.savefig(f'{os.getcwd()}/plots/graphs/{seed}.png')
+        plt.savefig(f'{os.getcwd()}/plots/graphs/sbmal_{seed}.png')
         plt.clf()
         """
         
