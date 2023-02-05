@@ -34,4 +34,4 @@ grid:
   overrides.tags:
     type: choice
     options:
-      - ['classification_sbmal_edges_v5']
+      - ['classification_sbmal_edges_v6']

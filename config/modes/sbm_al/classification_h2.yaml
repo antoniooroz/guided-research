@@ -14,7 +14,7 @@ experiment:
   num_classes: 6
   sbm_classes: [100, 100, 100, 100, 100, 100, 100, 100,100, 100, 100, 100,100, 100, 100, 100,100, 100, 100, 100,100, 100, 100, 100,100, 100, 100, 100]
   sbm_connection_probabilities_id_in_cluster: 0.01
-  sbm_connection_probabilities_id_out_cluster: 0.01
+  sbm_connection_probabilities_id_out_cluster: 0.001
   
   sbm_nfeatures: 10
   sbm_feature_mean: 0
