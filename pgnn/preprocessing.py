@@ -37,13 +37,25 @@ def known_unknown_split(
 
 
 def train_stopping_split(
-        idx: np.ndarray, labels: np.ndarray, ntrain_per_class: int = 20,
+        idx: np.ndarray, labels: np.ndarray, ntrain_per_class: int = 20, node_types=None, training_type=None,
         nstopping: int = 500, seed: int = 2413340114) -> Tuple[np.ndarray, np.ndarray]:
     rnd_state = np.random.RandomState(seed)
+    
+    if training_type is not None or len(training_type) > 0:
+        selector = (node_types == training_type[0])
+        for v in training_type[1:]:
+            selector += (node_types == v) 
+            
+        _idx = idx[selector]
+        _labels = labels[selector]
+    else:
+        _idx = idx
+        _labels = labels
+    
     train_idx_split = []
     for i in range(max(labels) + 1):
         train_idx_split.append(rnd_state.choice(
-                idx[labels == i], ntrain_per_class, replace=False))
+                _idx[_labels == i], ntrain_per_class, replace=False))
     train_idx = np.concatenate(train_idx_split)
     stopping_idx = rnd_state.choice(
             exclude_idx(idx, [train_idx]),
@@ -53,15 +65,19 @@ def train_stopping_split(
 
 def gen_splits(
         labels: np.ndarray, idx_split_args: Dict[str, int],
-        test: bool = False) -> Dict[Phase, torch.LongTensor]:
+        test: bool = False, node_types=None, training_type=None) -> Dict[Phase, torch.LongTensor]:
     all_idx = np.arange(len(labels))
     known_idx, unknown_idx = known_unknown_split(
-            all_idx, idx_split_args['nknown'])
+            all_idx, idx_split_args['nknown'], node_types)
     _, cnts = np.unique(labels[known_idx], return_counts=True)
     stopping_split_args = copy.copy(idx_split_args)
     del stopping_split_args['nknown']
     train_idx, stopping_idx = train_stopping_split(
-            known_idx, labels[known_idx], **stopping_split_args)
+            known_idx,
+            labels[known_idx], 
+            node_types=node_types[known_idx] if node_types is not None else None, 
+            training_type=training_type,
+            **stopping_split_args)
     if test:
         val_idx = unknown_idx
     else:

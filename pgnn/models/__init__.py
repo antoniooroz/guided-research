@@ -8,3 +8,4 @@ from .ppnp.ppnp import PPNP
 from .ppnp.mcd_ppnp import MCD_PPNP
 from .ppnp.p_ppnp import P_PPNP
 from .gpn.gpn import GPN
+from .mlp import MLP

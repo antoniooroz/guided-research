@@ -96,7 +96,7 @@ def _calculate_mean_and_standard_deviation(values):
     if values.dtype != 'object':
         values = torch.FloatTensor(values)
         mean = values.mean()
-        standard_deviation = torch.sqrt(torch.sum(torch.square(values - mean)) / values.shape[0])
+        standard_deviation = torch.sqrt(torch.sum(torch.square(values - mean)) / (values.shape[0]-1))
         
         return mean.item(), standard_deviation.item()
     else:

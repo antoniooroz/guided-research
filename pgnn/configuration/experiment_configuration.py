@@ -23,6 +23,7 @@ class ExperimentConfiguration(BaseConfiguration):
         self.sbm_feature_mean = 0
         self.sbm_feature_variance = 10
         self.sbm_feature_sampling_variance = 10
+        self.sbm_feature_sampling_variance_informed = 0.1
         self.sbm_ood_euclidian_distance = 10
         self.sbm_classes = [125, 125, 200, 125]
         self.sbm_connection_probabilities_id_in_cluster = 0.01
@@ -30,6 +31,7 @@ class ExperimentConfiguration(BaseConfiguration):
         self.sbm_connection_probabilities_ood_in_cluster = 0.01
         self.sbm_connection_probabilities_ood_out_cluster = 0.001
         
+        self.training_type = None
         self.active_learning: bool = False
         self.active_learning_retrain: bool = False
         self.active_learning_dynamic_update: bool = False
@@ -70,6 +72,7 @@ class ExperimentMode(Enum):
     
 class Dataset(Enum):
     GENERATED_SBM = 'generated_sbm'
+    GENERATED_SBM_AL = 'generated_sbm_al'
     CORA_ML = 'cora_ml'
     CITESEER = 'citeseer'
 

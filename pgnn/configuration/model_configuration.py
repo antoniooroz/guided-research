@@ -73,6 +73,8 @@ class ModelType(Enum):
     
     GPN = 'GPN'
     
+    MLP = 'MLP'
+    
     # TODO ...    
     def gat_bayesian_projection() -> list['ModelType']:
         raise NotImplementedError()
