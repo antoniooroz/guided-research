@@ -23,7 +23,7 @@ grid:
   config.2:
     type: choice
     options:
-      - ["modes/sbm_al/classification"]
+      - ["modes/sbm_al/classification_h2"]
   overrides.experiment.training_type:
     type: choice
     options:
