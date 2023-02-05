@@ -19,7 +19,7 @@ grid:
   config.1:
     type: choice
     options:
-      - ["models/sbm/mlp"]
+      - ["models/sbm/ppnp"]
   config.2:
     type: choice
     options:
