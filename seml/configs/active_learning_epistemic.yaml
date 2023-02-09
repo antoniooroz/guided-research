@@ -33,4 +33,4 @@ grid:
   overrides.tags:
     type: choice
     options:
-      - ['active_learning_sbmal_v1']
+      - ['active_learning_sbmal_v2']

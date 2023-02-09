@@ -41,7 +41,7 @@ def train_stopping_split(
         nstopping: int = 500, seed: int = 2413340114) -> Tuple[np.ndarray, np.ndarray]:
     rnd_state = np.random.RandomState(seed)
     
-    if training_type is not None or len(training_type) > 0:
+    if training_type is not None and len(training_type) > 0:
         selector = (node_types == training_type[0])
         for v in training_type[1:]:
             selector += (node_types == v) 
