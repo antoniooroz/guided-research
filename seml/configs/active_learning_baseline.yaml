@@ -19,17 +19,21 @@ grid:
   config.1:
     type: choice
     options:
+      - ["models/sbm/ppnp"]
       - ["models/sbm/mcd_ppnp"]
+      - ["models/sbm/gcn"]
       - ["models/sbm/mcd_gcn"]
   config.2:
     type: choice
     options:
-      - ["modes/sbm_al/active_learning"]
-  config.3:
+      - ["modes/sbm_al/active_learning_baseline"]
+  overrides.experiment.training_type:
     type: choice
     options:
-      - ["active_learning/uncertainty_isolated_epistemic"]
-      - ["active_learning/uncertainty_propagated_epistemic"]
+      - [0]
+      - [1]
+      - [2]
+      - [3]
   overrides.tags:
     type: choice
     options:

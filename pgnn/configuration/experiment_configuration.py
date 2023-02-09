@@ -129,7 +129,7 @@ class ActiveLearningSelector(Enum):
     RANDOM = 0
     UNCERTAINTY = 1
     L2_DISTANCE = 2
-    
+    FIXED = 3
     
 class OODAttributeNormalization(Enum):
     DIV_BY_SUM = 1
