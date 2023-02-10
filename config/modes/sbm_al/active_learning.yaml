@@ -8,7 +8,7 @@ experiment:
   iterations_per_seed: 3
 
   dataset: GENERATED_SBM_AL
-  datapoints_training_per_class: 2
+  datapoints_training_per_class: 55
   datapoints_stopping: 300
   datapoints_known: 1500
   num_classes: 6
@@ -23,6 +23,7 @@ experiment:
   sbm_feature_sampling_variance_informed: 3
 
   active_learning: True
+  active_learning_retrain: True
   active_learning_start_cap_per_class: 1
   active_learning_update_interval: 200
   active_learning_budget_per_update: 2
