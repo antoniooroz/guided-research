@@ -32,6 +32,8 @@ class ExperimentConfiguration(BaseConfiguration):
         self.sbm_connection_probabilities_ood_out_cluster = 0.001
         
         self.training_type = None
+        self.active_learning_training_type = None
+        
         self.active_learning: bool = False
         self.active_learning_retrain: bool = False
         self.active_learning_dynamic_update: bool = False

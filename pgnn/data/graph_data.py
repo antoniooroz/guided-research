@@ -41,6 +41,7 @@ class GraphData:
         self.labels_all = None
         self.oods_all = None
         self.dataloaders = None
+        self.types = None
         
     def init(self, seed) -> tuple[torch.Tensor, DataLoader]:
         device = get_device()
@@ -52,6 +53,7 @@ class GraphData:
         self.oods_all = torch.zeros(self.labels_all.shape).to(device)
         self.feature_matrix = self.graph.attr_matrix.clone().detach().to(device)
         self.adjacency_matrix = matrix_to_torch(self.graph.adj_matrix)
+        self.types = self.graph.node_names
         
         # Active Learning
         if self.experiment_configuration.active_learning:
@@ -472,6 +474,21 @@ class ActiveLearning:
                 uncertainties = resultsForNetworkMode._epistemic_uncertainties
             
             order = uncertainties.argsort(axis=0)
+        elif self.selector == ActiveLearningSelector.FIXED:
+            labels = graph_data.labels_all[idx_active_learning]
+            types = graph_data.types[idx_active_learning]
+            budget_per_class = budget_for_update // labels.max().item()+1
+            
+            importance = np.zeros(idx_active_learning.shape[0])
+            
+            for c in range(labels.max().item()+1):
+                select = np.zeros(idx_active_learning.shape[0])
+                for t in graph_data.experiment_configuration.active_learning_training_type:
+                    select += (labels == c) * (types == t)
+                make_important_indeces = select.argsort().flip()
+                importance[make_important_indeces[:budget_per_class]] = 1.0
+                    
+            order = importance.argsort()
         elif self.selector == ActiveLearningSelector.L2_DISTANCE:
             order = l2_distances.cpu().numpy().argsort(axis=0)
         else:
