@@ -53,3 +53,7 @@ grid:
       - 4
       - 8
       - 16
+  overrides.training.wandb_logging_during_training:
+    type: choice
+    options:
+      - False

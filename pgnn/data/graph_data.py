@@ -558,9 +558,6 @@ class ActiveLearning:
                 'mean_l2_distance_out': None,
                 'added_nodes': 0
             }
-        
-        early_stopping.load_best()
-        
         idx_new_training, idx_new_active_learning, mean_l2_distance_in, mean_l2_distance_out = self.select(graph_data=graph_data, active_learning_results=active_learning_results)
         
         graph_data.idx_all[Phase.TRAINING] = torch.cat([graph_data.idx_all[Phase.TRAINING], idx_new_training]).to(idx_new_training.device)

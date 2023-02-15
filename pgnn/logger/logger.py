@@ -28,6 +28,10 @@ class Logger():
     def logStep(self, results: dict[Phase, Results], weights: LogWeight):
         self.iterations[-1].logStep(results, weights)
         
+    def logActiveLearning(self, resultsPerPhase: dict[Phase, Results], step, weights: LogWeight):
+        for phase, results in resultsPerPhase.items():
+            self.iterations[-1].logActiveLearning(phase, results, step)
+        
     def logEval(self, resultsPerPhase: dict[Phase, Results], weights: LogWeight):
         for phase, results in resultsPerPhase.items():
             self.iterations[-1].logEval(phase, results, weights)
@@ -87,6 +91,13 @@ class LogIteration():
             Phase.TRAINING: [],
             Phase.STOPPING: []
         }
+        
+        self.log_active_learning = {
+            Phase.TRAINING: [],
+            Phase.STOPPING: [],
+            Phase.VALTEST: []
+        }
+        
         self.log_evaluation = {
             Phase.TRAINING: None,
             Phase.STOPPING: None,
@@ -106,6 +117,9 @@ class LogIteration():
             self.log_training[phase].append(logStep)
         self.step += 1
         
+    def logActiveLearning(self, phase, results, step):
+        self.log_active_learning[phase].append(LogStep(self.configuration, 0, f'al/{step}', phase, results))
+        
     def logEval(self, phase, results, weights):
         self.log_evaluation[phase] = LogStep(self.configuration, 0, 'eval', phase, results, weights)
         
@@ -116,6 +130,10 @@ class LogIteration():
         data = {'seed': self.seed, 'iteration': self.iteration, 'steps': self.step}
         for logStep in self.log_evaluation.values():
             data.update(logStep.results)
+            
+        for l in self.log_active_learning.values():
+            for logStep in l:
+                data.update(logStep.results)
             
         return data
             

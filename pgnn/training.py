@@ -122,6 +122,11 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
 
                     
                 if configuration.experiment.active_learning:
+                    early_stopping.load_best()
+                    
+                    activeLearningResults = final_run(model, graph_data.feature_matrix, graph_data.idx_all, graph_data.labels_all, graph_data.oods_all)
+                    logger.logActiveLearning(resultsPerPhase=activeLearningResults, step=epoch)
+                    
                     active_learning_update_logs = active_learning.update(
                         graph_data=graph_data,
                         active_learning_results=resultsPerPhase[Phase.ACTIVE_LEARNING],
