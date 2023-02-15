@@ -1,0 +1,5 @@
+experiment:
+  active_learning_selector: FIXED
+  active_learning_training_type: [1]
+  active_learning_selector_network_mode: PROPAGATED
+  active_learning_selector_uncertainty_mode: ALEATORIC
