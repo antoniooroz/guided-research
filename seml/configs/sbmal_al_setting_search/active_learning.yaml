@@ -2,7 +2,7 @@ seml:
   executable: run.py
   name: Active_Learning
   output_dir: seml/logs
-  project_root_dir: ../..
+  project_root_dir: ../../..
 
 slurm:
   experiments_per_job: 1
