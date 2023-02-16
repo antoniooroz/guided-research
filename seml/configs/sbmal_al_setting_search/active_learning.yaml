@@ -45,14 +45,19 @@ grid:
       - 0.001
       - 0.002
       - 0.01
-  overrides.experiment.sbm_connection_probabilities_id_out_cluster:
+  overrides.experiment.sbm_feature_sampling_variance:
     type: choice
     options:
+      - 0.1
       - 1
-      - 2
-      - 4
-      - 8
-      - 16
+      - 5
+      - 10
+  overrides.experiment.sbm_feature_sampling_variance_informed:
+    type: choice
+    options:
+      - 0.01
+      - 0.1
+      - 1
   overrides.training.wandb_logging_during_training:
     type: choice
     options:
