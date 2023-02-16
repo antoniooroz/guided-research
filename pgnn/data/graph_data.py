@@ -475,8 +475,8 @@ class ActiveLearning:
             
             order = uncertainties.argsort(axis=0)
         elif self.selector == ActiveLearningSelector.FIXED:
-            labels = graph_data.labels_all[idx_active_learning]
-            types = graph_data.types[idx_active_learning]
+            labels = graph_data.labels_all.cpu().numpy()[idx_active_learning.cpu()]
+            types = graph_data.types[idx_active_learning.cpu()]
             budget_per_class = budget_for_update // labels.max().item()+1
             
             importance = np.zeros(idx_active_learning.shape[0])
@@ -485,7 +485,7 @@ class ActiveLearning:
                 select = np.zeros(idx_active_learning.shape[0])
                 for t in graph_data.experiment_configuration.active_learning_training_type:
                     select += (labels == c) * (types == t)
-                make_important_indeces = select.argsort().flip()
+                make_important_indeces = np.flip(select.argsort())
                 importance[make_important_indeces[:budget_per_class]] = 1.0
                     
             order = importance.argsort()
@@ -534,7 +534,10 @@ class ActiveLearning:
         
         return l2_distances
             
-    def _should_update(self, epoch: int = 0, loss: float = 0):
+    def should_update(self, epoch: int = 0, loss: float = 0):
+        if self.budget == 0:
+            return False
+        
         if self.dynamic_update:
             if self.saved_loss is None or loss < self.saved_loss:
                 self.saved_loss = loss
@@ -551,13 +554,7 @@ class ActiveLearning:
         else:
             return False
             
-    def update(self, graph_data: GraphData, active_learning_results: Results, epoch: int = 0, loss: float = 0, early_stopping = None, training_phase = None):
-        if self.budget == 0 or not self._should_update(epoch, loss):
-            return {
-                'mean_l2_distance_in': None,
-                'mean_l2_distance_out': None,
-                'added_nodes': 0
-            }
+    def update(self, graph_data: GraphData, active_learning_results: Results, epoch: int = 0, loss: float = 0, early_stopping = None, training_phase = None):            
         idx_new_training, idx_new_active_learning, mean_l2_distance_in, mean_l2_distance_out = self.select(graph_data=graph_data, active_learning_results=active_learning_results)
         
         graph_data.idx_all[Phase.TRAINING] = torch.cat([graph_data.idx_all[Phase.TRAINING], idx_new_training]).to(idx_new_training.device)
