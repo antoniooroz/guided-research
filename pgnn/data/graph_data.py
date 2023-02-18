@@ -485,6 +485,9 @@ class ActiveLearning:
                 select = np.zeros(idx_active_learning.shape[0])
                 for t in graph_data.experiment_configuration.active_learning_training_type:
                     select += (labels == c) * (types == t)
+                
+                assert select.sum() > budget_per_class
+                
                 make_important_indeces = np.flip(select.argsort())
                 importance[make_important_indeces[:budget_per_class]] = 1.0
                     
