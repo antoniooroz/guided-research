@@ -40,8 +40,8 @@ grid:
   overrides.experiment.sbm_connection_probabilities_id_out_cluster:
     type: choice
     options:
-      - 0.00125
       - 0.0025
+      - 0.005
       - 0.01
   overrides.experiment.sbm_feature_sampling_variance:
     type: choice
