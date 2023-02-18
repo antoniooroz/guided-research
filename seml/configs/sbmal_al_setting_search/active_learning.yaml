@@ -36,28 +36,23 @@ grid:
   overrides.tags:
     type: choice
     options:
-      - ['active_learning_sbmal_setting_search_v1']
+      - ['active_learning_sbmal_setting_search_v2']
   overrides.experiment.sbm_connection_probabilities_id_out_cluster:
     type: choice
     options:
-      - 0.0002
-      - 0.0005
-      - 0.001
-      - 0.002
+      - 0.00125
+      - 0.0025
       - 0.01
   overrides.experiment.sbm_feature_sampling_variance:
     type: choice
     options:
-      - 0.1
-      - 1
-      - 5
       - 10
+      - 20
+      - 30
   overrides.experiment.sbm_feature_sampling_variance_informed:
     type: choice
     options:
-      - 0.01
       - 0.1
-      - 1
   overrides.training.wandb_logging_during_training:
     type: choice
     options:
