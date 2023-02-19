@@ -14,13 +14,13 @@ experiment:
   num_classes: 6
   sbm_classes: [40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400,40, 400, 40, 400]
   sbm_connection_probabilities_id_in_cluster: 0.01
-  sbm_connection_probabilities_id_out_cluster: 0.002
+  sbm_connection_probabilities_id_out_cluster: 0.0025
   
   sbm_nfeatures: 10
   sbm_feature_mean: 0
   sbm_feature_variance: 1
-  sbm_feature_sampling_variance: 30
-  sbm_feature_sampling_variance_informed: 3
+  sbm_feature_sampling_variance: 15
+  sbm_feature_sampling_variance_informed: 0.1
 
   active_learning: True
   active_learning_retrain: True
