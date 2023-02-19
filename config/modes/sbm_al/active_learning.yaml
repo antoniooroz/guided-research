@@ -42,3 +42,4 @@ training:
     TRAINING: 1800
   max_epochs:
     TRAINING: 1800
+  wandb_logging_during_training: False

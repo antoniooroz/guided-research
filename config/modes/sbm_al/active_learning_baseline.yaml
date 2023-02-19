@@ -42,3 +42,4 @@ training:
     TRAINING: 401
   max_epochs:
     TRAINING: 401
+  wandb_logging_during_training: False
