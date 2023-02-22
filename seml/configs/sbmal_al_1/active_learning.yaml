@@ -16,67 +16,24 @@ slurm:
 ###### BEGIN PARAMETER CONFIGURATION ######
 
 fixed:
-  overrides.tags: ['active_learning_sbmal_v4']
+  overrides.tags: ['active_learning_sbmal_v5']
 
-standard: 
-  grid:
-    config.1:
-      type: choice
-      options:
-        - ["models/sbm/mcd_ppnp"]
-        - ["models/sbm/mcd_gcn"]
-        - ["models/sbm/ppnp"]
-        - ["models/sbm/gcn"]
-    config.2:
-      type: choice
-      options:
-        - ["modes/sbm_al/active_learning"]
-    config.3:
-      type: choice
-      options:
-        - ["active_learning/l2_distance"]
-        - ["active_learning/random"]
-        - ["active_learning/uncertainty_isolated_aleatoric"]
-        - ["active_learning/uncertainty_propagated_aleatoric"]
-
-# EPISTEMIC
-epistemic: 
-  grid:
-    config.1:
-      type: choice
-      options:
-        - ["models/sbm/mcd_ppnp"]
-        - ["models/sbm/mcd_gcn"]
-    config.2:
-      type: choice
-      options:
-        - ["modes/sbm_al/active_learning"]
-    config.3:
-      type: choice
-      options:
-        - ["active_learning/uncertainty_isolated_epistemic"]
-        - ["active_learning/uncertainty_propagated_epistemic"]
-
-# BASELINES
-baselines: 
-  grid:
-    config.1:
-      type: choice
-      options:
-        - ["models/sbm/ppnp"]
-        - ["models/sbm/mcd_ppnp"]
-        - ["models/sbm/gcn"]
-        - ["models/sbm/mcd_gcn"]
-    config.2:
-      type: choice
-      options:
-        - ["active_learning/random"]
-        - ["active_learning/fixed_all"]
-        - ["active_learning/fixed_ic"]
-        - ["active_learning/fixed_ie"]
-        - ["active_learning/fixed_uc"]
-        - ["active_learning/fixed_ue"]
-    config.3:
-      type: choice
-      options:
-        - ["modes/sbm_al/active_learning_baseline"]
+grid:
+  config.1:
+    type: choice
+    options:
+      - ["models/sbm/mcd_ppnp"]
+      - ["models/sbm/mcd_gcn"]
+      - ["models/sbm/ppnp"]
+      - ["models/sbm/gcn"]
+  config.2:
+    type: choice
+    options:
+      - ["modes/sbm_al/active_learning"]
+  config.3:
+    type: choice
+    options:
+      - ["active_learning/l2_distance"]
+      - ["active_learning/random"]
+      - ["active_learning/uncertainty_isolated_aleatoric"]
+      - ["active_learning/uncertainty_propagated_aleatoric"]

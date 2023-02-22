@@ -15,6 +15,9 @@ slurm:
 
 ###### BEGIN PARAMETER CONFIGURATION ######
 
+fixed:
+  overrides.tags: ['active_learning_sbmal_v5']
+
 grid:
   config.1:
     type: choice
@@ -26,7 +29,6 @@ grid:
   config.2:
     type: choice
     options:
-      - ["active_learning/random"]
       - ["active_learning/fixed_all"]
       - ["active_learning/fixed_ic"]
       - ["active_learning/fixed_ie"]
@@ -36,7 +38,3 @@ grid:
     type: choice
     options:
       - ["modes/sbm_al/active_learning_baseline"]
-  overrides.tags:
-    type: choice
-    options:
-      - ['active_learning_sbmal_v4']

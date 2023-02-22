@@ -15,6 +15,9 @@ slurm:
 
 ###### BEGIN PARAMETER CONFIGURATION ######
 
+fixed:
+  overrides.tags: ['active_learning_sbmal_v5']
+
 grid:
   config.1:
     type: choice
@@ -30,7 +33,3 @@ grid:
     options:
       - ["active_learning/uncertainty_isolated_epistemic"]
       - ["active_learning/uncertainty_propagated_epistemic"]
-  overrides.tags:
-    type: choice
-    options:
-      - ['active_learning_sbmal_v4']

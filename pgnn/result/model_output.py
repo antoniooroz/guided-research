@@ -101,6 +101,6 @@ class GPNModelOutput(ModelOutput):
                 epistemic_uncertainties: Optional[torch.Tensor] = None,
                 aleatoric_uncertainties: Optional[torch.Tensor] = None,
                 alpha: Optional[torch.Tensor] = None):
-        super.__init__(logits, softmax_scores, predicted_classes, epistemic_uncertainties, aleatoric_uncertainties)
+        super().__init__(logits, softmax_scores, predicted_classes, epistemic_uncertainties, aleatoric_uncertainties)
         self.alpha = alpha
     

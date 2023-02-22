@@ -19,7 +19,7 @@ experiment:
   sbm_nfeatures: 10
   sbm_feature_mean: 0
   sbm_feature_variance: 1
-  sbm_feature_sampling_variance: 15
+  sbm_feature_sampling_variance: 10
   sbm_feature_sampling_variance_informed: 0.1
 
   active_learning: True
