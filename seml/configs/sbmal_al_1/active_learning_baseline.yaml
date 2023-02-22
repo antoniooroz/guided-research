@@ -29,12 +29,12 @@ grid:
   config.2:
     type: choice
     options:
+      - ["modes/sbm_al/active_learning_baseline"]
+  config.3:
+    type: choice
+    options:
       - ["active_learning/fixed_all"]
       - ["active_learning/fixed_ic"]
       - ["active_learning/fixed_ie"]
       - ["active_learning/fixed_uc"]
       - ["active_learning/fixed_ue"]
-  config.3:
-    type: choice
-    options:
-      - ["modes/sbm_al/active_learning_baseline"]
