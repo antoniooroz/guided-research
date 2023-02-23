@@ -16,7 +16,7 @@ slurm:
 ###### BEGIN PARAMETER CONFIGURATION ######
 
 fixed:
-  overrides.tags: ['active_learning_sbmal_v6']
+  overrides.tags: ['active_learning_sbmal_v7']
 
 grid:
   config.1:
@@ -27,7 +27,7 @@ grid:
   config.2:
     type: choice
     options:
-      - ["modes/sbm_al/active_learning"]
+      - ["modes/sbm_al/single_seed_active_learning"]
   config.3:
     type: choice
     options:
