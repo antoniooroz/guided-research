@@ -269,10 +269,10 @@ class GPN(Model):
         
         return model_outputs
     
-    def init(self, pytorch_seed, date_time_str, iteration, data_seed):
+    def init(self, pytorch_seed, model_name, iteration, data_seed):
         torch.manual_seed(seed=pytorch_seed)
         self.pytorch_seed = pytorch_seed
-        self.date_time_str = date_time_str
+        self.model_name = model_name
         self.iteration = iteration
         self.data_seed = data_seed
         
@@ -330,7 +330,7 @@ class GPN(Model):
             'torch_seed': copy.deepcopy(self.pytorch_seed),
             'data_seed': copy.deepcopy(self.data_seed),
             'iteration': copy.deepcopy(self.iteration),
-            'date_time': copy.deepcopy(self.date_time_str)
+            'model_name': copy.deepcopy(self.model_name)
         }
 
     def save_model(self, custom_state_dict = None):

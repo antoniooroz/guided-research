@@ -121,7 +121,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                     resultsPerPhase[phase] = results
 
                     
-                if configuration.experiment.active_learning and active_learning.should_update(epoch=epoch, loss=resultsPerPhase[Phase.TRAINING].networkModeResults[NetworkMode.PROPAGATED].loss):
+                if training_phase == Phase.TRAINING and configuration.experiment.active_learning and active_learning.should_update(epoch=epoch, loss=resultsPerPhase[Phase.TRAINING].networkModeResults[NetworkMode.PROPAGATED].loss):
                     early_stopping.load_best()
                     
                     activeLearningResults = final_run(model, graph_data.feature_matrix, graph_data.idx_all, graph_data.labels_all, graph_data.oods_all)
@@ -157,6 +157,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                     
             # Load best model parameters from era
             early_stopping.load_best()
+            early_stopping.set_first()
 
         runtime = time.time() - start_time
         runtime_perepoch = runtime / (epoch + 1)

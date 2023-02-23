@@ -59,6 +59,9 @@ class EarlyStopping:
         if self.enabled:
             self.model.load_custom_state_dict(self.best.state_dict)
     
+    def set_first(self):
+        self.first = SavedState(state_dict=self.model.custom_state_dict(), value=0, epoch=0)
+    
     def load_first(self):
         if self.enabled:
             self.model.load_custom_state_dict(self.first.state_dict)

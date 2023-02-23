@@ -191,7 +191,7 @@ class BatchedNormalizingFlowDensity(nn.Module):
         mean = mean.repeat(z_cpu.size(1), 1, 1).permute(1, 0, 2)
         cov = cov.repeat(z_cpu.size(1), 1, 1, 1).permute(1, 0, 2, 3)
 
-        log_prob_z = tdist.MultivariateNormal(mean, cov).log_prob(z_cpu)
+        log_prob_z = tdist.MultivariateNormal(mean, cov, validate_args=False).log_prob(z_cpu)
 
         log_prob_z = log_prob_z.to(z.device)
         log_prob_x = log_prob_z + sum_log_jacobians  # [batch_size]

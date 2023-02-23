@@ -84,6 +84,8 @@ class GraphData:
             self.graph = SBM.init(self, seed)
         elif self.experiment_configuration.dataset == Dataset.GENERATED_SBM_AL:
             self.graph = SBM_AL.init(self, seed)
+            
+        assert self.experiment_configuration.num_classes == max(self.graph.labels)+1
         
         #self.plot_tsne(seed, self.graph.attr_matrix, self.graph.labels)
     
@@ -115,6 +117,22 @@ class GraphData:
         plt.clf()
         
     def get_split(self, seed):
+        if self.experiment_configuration.dataset == Dataset.GENERATED_SBM_AL:
+            node_types = self.graph.node_names.astype('int64')
+            
+            split_ratio = []
+            for c in range(self.experiment_configuration.num_classes):
+                class_split_ratio = []
+                for t in range(4):
+                    class_split_ratio.append(self.experiment_configuration.sbm_classes[4*c + t])
+                nodes_in_class = sum(class_split_ratio)
+                for t in range(4):
+                    class_split_ratio[t] = class_split_ratio[t] / nodes_in_class
+                split_ratio.append(class_split_ratio)
+        else:
+            node_types = None
+            split_ratio = None
+        
         idx_all = gen_splits(
             labels=self.graph.labels.astype('int64'), 
             idx_split_args={
@@ -124,10 +142,12 @@ class GraphData:
                 'seed': seed
             }, 
             test=self.experiment_configuration.seeds.experiment_mode==ExperimentMode.TEST,
-            node_types = self.graph.node_names.astype('int64'),
-            training_type=self.experiment_configuration.training_type
+            node_types = node_types,
+            training_type=self.experiment_configuration.training_type,
+            split_ratio=split_ratio
         )
         return idx_all
+        
         
     def init_dataloaders(self, batch_size=None):
         # MPS fix -> repeats only one item in dataloader...

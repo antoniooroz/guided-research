@@ -8,11 +8,11 @@ experiment:
   iterations_per_seed: 3
 
   dataset: GENERATED_SBM_AL
-  datapoints_training_per_class: 220
+  datapoints_training_per_class: 110
   datapoints_stopping: 300
-  datapoints_known: 4000
-  num_classes: 6
-  sbm_classes: [40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400, 40, 400,40, 400, 40, 400]
+  datapoints_known: 2000
+  num_classes: 7
+  sbm_classes: [20, 200, 20, 200, 20, 200, 20, 200, 20, 200, 20, 200, 20, 200, 20, 200, 20, 200, 20, 200, 20, 200, 20, 200,20, 200, 20, 200]
   sbm_connection_probabilities_id_in_cluster: 0.01
   sbm_connection_probabilities_id_out_cluster: 0.0025
   
