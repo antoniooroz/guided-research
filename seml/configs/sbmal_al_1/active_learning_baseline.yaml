@@ -29,7 +29,6 @@ grid:
       - ["models/sbm/mlp"]
       - ["models/gpn_16"]
       - ["models/gat"]
-      - ["models/p_ppnp_sbm"]
   config.2:
     type: choice
     options:
