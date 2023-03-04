@@ -31,6 +31,8 @@ class ExperimentConfiguration(BaseConfiguration):
         self.sbm_connection_probabilities_ood_in_cluster = 0.01
         self.sbm_connection_probabilities_ood_out_cluster = 0.001
         
+        self.sbm_al2_uninformative_layers = 3
+        
         self.training_type = None
         self.active_learning_training_type = None
         

@@ -126,7 +126,9 @@ class P_Base(Base):
             Phase.TRAINING: SVI(self.model_wrapper, self.guide, self.optimizer[Phase.TRAINING], loss=self.elbo)
         }
 
-    def step(self, phase: Phase, data: Data) -> Results:
+    def step(self, phase: Phase, data: Data, loss_balance_weights=None) -> Results:
+        assert loss_balance_weights is None
+        
         is_training = phase in Phase.training_phases()
         self.set_eval(not is_training)
 

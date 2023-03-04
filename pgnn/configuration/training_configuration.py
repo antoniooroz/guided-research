@@ -19,6 +19,8 @@ class TrainingConfiguration(BaseConfiguration):
         self.phases: list[Phase] = [Phase.TRAINING]
         self.wandb_logging_during_training: bool = True
         
+        self.balanced_loss = False
+        
         # OOD
         self.ood_eval_during_training: bool = False
         

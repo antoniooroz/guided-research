@@ -74,7 +74,7 @@ class Base(PyroModule):
                 )
         }
     
-    def step(self, phase: Phase, data: Data) -> Results:
+    def step(self, phase: Phase, data: Data, loss_balance_weights=None) -> Results:
         is_training = phase in Phase.training_phases()
         self.set_eval(not is_training)
         
@@ -89,11 +89,13 @@ class Base(PyroModule):
                 model_output = model_outputs[network_mode]
                 loss = 0
                 
+                # Calculate loss
                 if model_output.softmax_scores is not None:
-                    # Calculate loss
+                        
                     loss = F.nll_loss(
                         input=torch.log(model_output.softmax_scores[data.ood_indicators==0]), 
-                        target=data.labels[data.ood_indicators==0]
+                        target=data.labels[data.ood_indicators==0],
+                        weight=loss_balance_weights
                     )
 
                     if is_training and network_mode==NetworkMode.PROPAGATED:

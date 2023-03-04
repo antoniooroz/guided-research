@@ -23,7 +23,7 @@ from pgnn.data import Data, ModelInput
 from pgnn.result.result import Info, Results
 
 import pgnn.models as models
-from pgnn.utils.utils import matrix_to_torch
+from pgnn.utils.utils import matrix_to_torch, balanced_weights
 
 from .data.sparsegraph import SparseGraph
 from .preprocessing import gen_seeds
@@ -74,6 +74,14 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
 
     active_learning = ActiveLearning(configuration)
 
+    if configuration.training.balanced_loss:
+        loss_balance_weights = balanced_weights(
+            n_classes=graph_data.nclasses, 
+            labels=graph_data.labels_all[Phase.TRAINING]
+        )
+    else:
+        loss_balance_weights = None
+
     # Training
     start_time = time.time()
     if not configuration.training.skip_training:
@@ -107,7 +115,11 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                             ood_indicators=oods.to(device)
                         )
                         
-                        results += model.step(phase if epoch > 0 else Phase.INIT, data)
+                        results += model.step(
+                            phase=phase if epoch > 0 else Phase.INIT, 
+                            data=data,
+                            loss_balance_weights=loss_balance_weights
+                        )
                         number_of_nodes += idx.shape[0]
                         
                     
@@ -134,6 +146,11 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                         loss=resultsPerPhase[Phase.TRAINING].networkModeResults[NetworkMode.PROPAGATED].loss,
                         early_stopping=early_stopping,
                         training_phase=training_phase
+                    )
+                    
+                    loss_balance_weights = balanced_weights(
+                        n_classes=graph_data.nclasses, 
+                        labels=graph_data.labels_all[Phase.TRAINING]
                     )
                     
                     resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_in = active_learning_update_logs['mean_l2_distance_in']

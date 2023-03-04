@@ -429,6 +429,93 @@ class SBM_AL:
             
         return features, labels, types
     
+class SBM_AL2(SBM_AL):
+    # Make all initializable
+    
+    def sbm_connection_probabilities(graph_data: GraphData):
+        # TODO: For SBM also allow frac ood, etc.
+        
+        N = len(graph_data.experiment_configuration.sbm_classes)
+        UNINFORMATIVE_LAYERS = graph_data.experiment_configuration.sbm_al2_uninformative_layers
+        LAYERS_PER_CLASS = 1 + UNINFORMATIVE_LAYERS
+        
+        assert N%LAYERS_PER_CLASS==0, "central informative nodes + number of uninformed layers per class"
+        
+        P_IN = graph_data.experiment_configuration.sbm_connection_probabilities_id_in_cluster
+        P_OUT = graph_data.experiment_configuration.sbm_connection_probabilities_id_out_cluster
+        
+        edge = np.ones([1,N]) * P_OUT
+        for i in range(N//4):
+            start = i*LAYERS_PER_CLASS
+            edge[0][start:start+LAYERS_PER_CLASS-1] = 0
+            
+        central = np.zeros([1,N])
+        
+        connection_probabilities = []
+        for i in range(N//LAYERS_PER_CLASS):
+            start = i*LAYERS_PER_CLASS
+            
+            edge_with_in_class = edge.copy()
+            central_with_in_class = central.copy()
+            
+            # Central layers
+            for j in range(start, start+LAYERS_PER_CLASS-1):
+                start_for_in_class = j if j==start else j-1
+                central_with_in_class[0][start_for_in_class:j+2] = P_IN
+                connection_probabilities.append(central_with_in_class)
+
+            # edge layer
+            start_for_in_class = start+LAYERS_PER_CLASS-2
+            edge_with_in_class[0][start_for_in_class:start_for_in_class+1] = P_IN
+            connection_probabilities.append(edge_with_in_class)
+        
+        return np.concatenate(connection_probabilities, axis=0)
+        
+    def features(graph_data: GraphData, seed):
+        # TODO
+        features = []
+        labels = []
+        types = []
+        
+        random_state = seed
+        
+        means = []
+        
+        for _ in range(len(graph_data.experiment_configuration.sbm_classes)//4):
+            means.append(sp.stats.norm.rvs(
+                loc=graph_data.experiment_configuration.sbm_feature_mean, 
+                scale=graph_data.experiment_configuration.sbm_feature_variance,
+                size=graph_data.experiment_configuration.sbm_nfeatures, 
+                random_state=random_state
+            ))
+            
+            random_state += 10
+        
+        for c, nsamples in enumerate(graph_data.experiment_configuration.sbm_classes):
+            is_informed = c%2==0 
+            mean = means[c//4]
+            
+            variance = graph_data.experiment_configuration.sbm_feature_sampling_variance_informed if is_informed else graph_data.experiment_configuration.sbm_feature_sampling_variance
+            
+            samples = sp.stats.multivariate_normal(
+                mean=mean,
+                cov=np.diag([variance] * mean.shape[0]),
+                seed=seed
+            ).rvs(size=nsamples)
+            
+            features.append(samples)
+            labels.extend([c//4] * nsamples)
+            types.extend([c%4] * nsamples)
+            
+        features = np.concatenate(features)
+        labels = np.asarray(labels)
+        types = np.asarray(types)
+            
+        graph_data.log_feature_distances(means)
+            
+        return features, labels, types
+    
+    
 class ActiveLearning:    
     def set_starting_class(graph_data: GraphData):
         if graph_data.experiment_configuration.active_learning_starting_class is not None:
@@ -495,13 +582,28 @@ class ActiveLearning:
             
             order = uncertainties.argsort(axis=0)
         elif self.selector == ActiveLearningSelector.FIXED:
-            labels = graph_data.labels_all.cpu().numpy()[idx_active_learning.cpu()]
-            types = graph_data.types[idx_active_learning.cpu()]
-            budget_per_class = budget_for_update // labels.max().item()+1
+            labels_all_numpy = graph_data.labels_all.cpu().numpy()
+            labels = labels_all_numpy[idx_active_learning.cpu()]
             
+            assert budget_for_update % (labels_all_numpy.max()+1) == 0 or budget_for_update == 1
+            
+            if budget_for_update == 1:
+                budget_per_class = budget_for_update
+                
+                labels_training = labels_all_numpy[graph_data.idx_all[Phase.TRAINING].cpu()]
+                labels_training_unique, labels_training_counts = np.unique(labels_training, return_counts=True)
+                
+                label_classes_range = [labels_training_unique[labels_training_counts.argmin()]]
+            else:
+                budget_per_class = budget_for_update // labels_all_numpy.max().item()+1
+                
+                label_classes_range = range(labels_all_numpy.max()+1)
+            
+            types = graph_data.types[idx_active_learning.cpu()]
+                
             importance = np.zeros(idx_active_learning.shape[0])
             
-            for c in range(labels.max().item()+1):
+            for c in label_classes_range:
                 select = np.zeros(idx_active_learning.shape[0])
                 for t in graph_data.experiment_configuration.active_learning_training_type:
                     select += (labels == c) * (types == t)
