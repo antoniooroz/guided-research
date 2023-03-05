@@ -77,6 +77,7 @@ class ExperimentMode(Enum):
 class Dataset(Enum):
     GENERATED_SBM = 'generated_sbm'
     GENERATED_SBM_AL = 'generated_sbm_al'
+    GENERATED_SBM_AL2 = 'generated_sbm_al2'
     CORA_ML = 'cora_ml'
     CITESEER = 'citeseer'
 

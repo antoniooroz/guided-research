@@ -28,7 +28,7 @@ class GraphData:
         self.configuration = configuration
         self.experiment_configuration = configuration.experiment
         
-        if self.experiment_configuration.dataset not in [Dataset.GENERATED_SBM, Dataset.GENERATED_SBM_AL]:
+        if not self.experiment_configuration.dataset.name.startswith('GENERATED'):
             self.graph = load_dataset(self.experiment_configuration.dataset.value)
             self.graph.standardize(select_lcc=True)
             self.graph.normalize_features(experiment_configuration=self.experiment_configuration)
@@ -81,9 +81,11 @@ class GraphData:
     
     def init_graph(self, seed):
         if self.experiment_configuration.dataset == Dataset.GENERATED_SBM:
-            self.graph = SBM.init(self, seed)
+            self.graph = SBM().init_graph(self, seed)
         elif self.experiment_configuration.dataset == Dataset.GENERATED_SBM_AL:
-            self.graph = SBM_AL.init(self, seed)
+            self.graph = SBM_AL().init_graph(self, seed)
+        elif self.experiment_configuration.dataset == Dataset.GENERATED_SBM_AL2:
+            self.graph = SBM_AL2().init_graph(self, seed)
             
         assert self.experiment_configuration.num_classes == max(self.graph.labels)+1
         
@@ -163,22 +165,15 @@ class GraphData:
                     for phase, dataset in datasets.items()}
     
 class SBM:
-    def init(graph_data: GraphData, seed):
-        import time
-        start_time = time.time()
-        
-        adj_matrix = SBM.generate_graph(graph_data, seed)
-        end_time_adj_matrix = time.time()
-        print(f'adj_matrix: {end_time_adj_matrix-start_time}')
-        
-        features, labels = SBM.features(graph_data, seed)
-        end_time_features = time.time()
-        print(f'features: {end_time_features-end_time_adj_matrix}')
+    def init_graph(self, graph_data: GraphData, seed):
+        adj_matrix = self.generate_graph(graph_data, seed)
+        features, labels, types = self.features(graph_data, seed)
         
         graph = SparseGraph(
             adj_matrix=adj_matrix,
             attr_matrix=features,
-            labels=labels
+            labels=labels,
+            node_names=types
         )
         
         graph.standardize(select_lcc=True)
@@ -186,11 +181,11 @@ class SBM:
         
         return graph
     
-    def generate_graph(graph_data: GraphData, seed):
+    def generate_graph(self, graph_data: GraphData, seed):
         # Create graph
         networkx_graph = nx.stochastic_block_model(
             graph_data.experiment_configuration.sbm_classes,
-            SBM.sbm_connection_probabilities(graph_data),
+            self.sbm_connection_probabilities(graph_data),
             nodelist=None,
             seed=seed,
             directed=False,
@@ -229,7 +224,7 @@ class SBM:
         
         return adj_matrix
     
-    def sbm_connection_probabilities(graph_data: GraphData):
+    def sbm_connection_probabilities(self, graph_data: GraphData):
         # TODO: For SBM also allow frac ood, etc.
         
         N = len(graph_data.experiment_configuration.sbm_classes)
@@ -254,7 +249,7 @@ class SBM:
         
         return connection_probabilities
         
-    def features(graph_data: GraphData, seed):
+    def features(self, graph_data: GraphData, seed):
         features = []
         labels = []
         
@@ -282,78 +277,10 @@ class SBM:
             
         graph_data.log_feature_distances(means)
             
-        return features, labels
+        return features, labels, None
     
-class SBM_AL:
-    def init(graph_data: GraphData, seed):
-        import time
-        start_time = time.time()
-        
-        adj_matrix = SBM_AL.generate_graph(graph_data, seed)
-        end_time_adj_matrix = time.time()
-        print(f'adj_matrix: {end_time_adj_matrix-start_time}')
-        
-        features, labels, types = SBM_AL.features(graph_data, seed)
-        end_time_features = time.time()
-        print(f'features: {end_time_features-end_time_adj_matrix}')
-        
-        graph = SparseGraph(
-            adj_matrix=adj_matrix,
-            attr_matrix=features,
-            labels=labels,
-            node_names=types
-        )
-        
-        graph.standardize(select_lcc=True)
-        graph.normalize_features(experiment_configuration=graph_data.experiment_configuration)
-        
-        return graph
-    
-    def generate_graph(graph_data: GraphData, seed):
-        # Create graph
-        networkx_graph = nx.stochastic_block_model(
-            graph_data.experiment_configuration.sbm_classes,
-            SBM_AL.sbm_connection_probabilities(graph_data),
-            nodelist=None,
-            seed=seed,
-            directed=False,
-            selfloops=False,
-            sparse=True
-        )
-        """
-        https://networkx.org/documentation/stable/auto_examples/drawing/plot_labels_and_colors.html"""
-        
-        
-        """
-        options = {"edgecolors": "tab:gray", "node_size": 100, "alpha": 1}
-        
-        plt.figure(figsize=(12, 10))
-        spring_k =4/sqrt(sum(graph_data.experiment_configuration.sbm_classes)) # default k is 1/sqrt
-        pos = nx.spring_layout(networkx_graph, seed=seed, scale=1, k=spring_k)
-        
-        i = 0
-        colors = (["#00A8E8"] * 2) + (["#003459"]*2) + (["#F45B69"] * 2) + (["#5A0001"] * 2) + (["#C3FFD7"] * 2) + (["#0C8346"] * 2)
-        for sbm_class, color in zip(graph_data.experiment_configuration.sbm_classes, colors):
-            nx.draw_networkx_nodes(networkx_graph, pos, nodelist=range(i, i+sbm_class), node_color=color, **options)
-            i+=sbm_class
-        
-        nx.draw_networkx_edges(networkx_graph, pos, width=0.5, alpha=0.5)
-        
-        plt.tight_layout()
-        plt.legend()
-        plt.savefig(f'{os.getcwd()}/plots/graphs/sbmal_{seed}.png')
-        plt.clf()
-        """
-        
-        n_nodes = sum(graph_data.experiment_configuration.sbm_classes)
-        
-        adj_matrix=sp.sparse.csr_matrix(
-            ([1]*len(networkx_graph.edges), (list(map(lambda x: x[0], networkx_graph.edges)), list(map(lambda x: x[1], networkx_graph.edges)))), shape=(n_nodes, n_nodes)
-        )
-        
-        return adj_matrix
-    
-    def sbm_connection_probabilities(graph_data: GraphData):
+class SBM_AL(SBM):        
+    def sbm_connection_probabilities(self, graph_data: GraphData):
         # TODO: For SBM also allow frac ood, etc.
         
         N = len(graph_data.experiment_configuration.sbm_classes)
@@ -386,7 +313,7 @@ class SBM_AL:
         
         return np.concatenate(connection_probabilities, axis=0)
         
-    def features(graph_data: GraphData, seed):
+    def features(self, graph_data: GraphData, seed):
         features = []
         labels = []
         types = []
@@ -430,11 +357,7 @@ class SBM_AL:
         return features, labels, types
     
 class SBM_AL2(SBM_AL):
-    # Make all initializable
-    
-    def sbm_connection_probabilities(graph_data: GraphData):
-        # TODO: For SBM also allow frac ood, etc.
-        
+    def sbm_connection_probabilities(self, graph_data: GraphData):
         N = len(graph_data.experiment_configuration.sbm_classes)
         UNINFORMATIVE_LAYERS = graph_data.experiment_configuration.sbm_al2_uninformative_layers
         LAYERS_PER_CLASS = 1 + UNINFORMATIVE_LAYERS
@@ -445,7 +368,7 @@ class SBM_AL2(SBM_AL):
         P_OUT = graph_data.experiment_configuration.sbm_connection_probabilities_id_out_cluster
         
         edge = np.ones([1,N]) * P_OUT
-        for i in range(N//4):
+        for i in range(N//LAYERS_PER_CLASS):
             start = i*LAYERS_PER_CLASS
             edge[0][start:start+LAYERS_PER_CLASS-1] = 0
             
@@ -455,24 +378,25 @@ class SBM_AL2(SBM_AL):
         for i in range(N//LAYERS_PER_CLASS):
             start = i*LAYERS_PER_CLASS
             
-            edge_with_in_class = edge.copy()
-            central_with_in_class = central.copy()
-            
             # Central layers
             for j in range(start, start+LAYERS_PER_CLASS-1):
+                central_with_in_class = central.copy()
                 start_for_in_class = j if j==start else j-1
                 central_with_in_class[0][start_for_in_class:j+2] = P_IN
                 connection_probabilities.append(central_with_in_class)
 
             # edge layer
+            edge_with_in_class = edge.copy()
             start_for_in_class = start+LAYERS_PER_CLASS-2
-            edge_with_in_class[0][start_for_in_class:start_for_in_class+1] = P_IN
+            edge_with_in_class[0][start_for_in_class:start_for_in_class+2] = P_IN
             connection_probabilities.append(edge_with_in_class)
         
         return np.concatenate(connection_probabilities, axis=0)
         
-    def features(graph_data: GraphData, seed):
-        # TODO
+    def features(self, graph_data: GraphData, seed):
+        UNINFORMATIVE_LAYERS = graph_data.experiment_configuration.sbm_al2_uninformative_layers
+        LAYERS_PER_CLASS = 1 + UNINFORMATIVE_LAYERS
+        
         features = []
         labels = []
         types = []
@@ -481,7 +405,7 @@ class SBM_AL2(SBM_AL):
         
         means = []
         
-        for _ in range(len(graph_data.experiment_configuration.sbm_classes)//4):
+        for _ in range(len(graph_data.experiment_configuration.sbm_classes)//LAYERS_PER_CLASS):
             means.append(sp.stats.norm.rvs(
                 loc=graph_data.experiment_configuration.sbm_feature_mean, 
                 scale=graph_data.experiment_configuration.sbm_feature_variance,
@@ -492,10 +416,13 @@ class SBM_AL2(SBM_AL):
             random_state += 10
         
         for c, nsamples in enumerate(graph_data.experiment_configuration.sbm_classes):
-            is_informed = c%2==0 
-            mean = means[c//4]
+            is_informed = c%LAYERS_PER_CLASS==0 
+            mean = means[c//LAYERS_PER_CLASS]
             
-            variance = graph_data.experiment_configuration.sbm_feature_sampling_variance_informed if is_informed else graph_data.experiment_configuration.sbm_feature_sampling_variance
+            if is_informed:
+                variance = graph_data.experiment_configuration.sbm_feature_sampling_variance_informed
+            else:
+                variance = graph_data.experiment_configuration.sbm_feature_sampling_variance
             
             samples = sp.stats.multivariate_normal(
                 mean=mean,
@@ -504,8 +431,8 @@ class SBM_AL2(SBM_AL):
             ).rvs(size=nsamples)
             
             features.append(samples)
-            labels.extend([c//4] * nsamples)
-            types.extend([c%4] * nsamples)
+            labels.extend([c//LAYERS_PER_CLASS] * nsamples)
+            types.extend([c%LAYERS_PER_CLASS] * nsamples)
             
         features = np.concatenate(features)
         labels = np.asarray(labels)

@@ -1,0 +1,53 @@
+custom_name: classification
+tags: ['active_learning_sbm_al2_test']
+
+experiment:
+  seeds:
+    end: 1
+  iterations_per_seed: 5
+
+  dataset: GENERATED_SBM_AL2
+  datapoints_training_per_class: 110
+  datapoints_stopping: 300
+  datapoints_known: 2000
+  num_classes: 7
+  sbm_al2_uninformative_layers: 4
+  sbm_classes: [
+      20, 200, 200, 200, 200,
+      20, 200, 200, 200, 200,
+      20, 200, 200, 200, 200,
+      20, 200, 200, 200, 200,
+      20, 200, 200, 200, 200,
+      20, 200, 200, 200, 200,
+      20, 200, 200, 200, 200,
+    ]
+  sbm_connection_probabilities_id_in_cluster: 0.01
+  sbm_connection_probabilities_id_out_cluster: 0.0025
+  
+  sbm_nfeatures: 10
+  sbm_feature_mean: 0
+  sbm_feature_variance: 1
+  sbm_feature_sampling_variance: 10
+  sbm_feature_sampling_variance_informed: 0.1
+
+  active_learning: True
+  active_learning_retrain: True
+  active_learning_start_cap_per_class: 1
+  active_learning_update_interval: 200
+  active_learning_budget_per_update: 14
+  active_learning_budget: 14
+  active_learning_starting_class: [0]
+  active_learning_selector: UNCERTAINTY
+  active_learning_selector_network_mode: ISOLATED
+  active_learning_selector_uncertainty_mode: ALEATORIC
+  active_learning_l2_distance_logging: True
+
+  ood: NONE
+  
+training:
+  ood_eval_during_training: False
+  patience: 
+    TRAINING: 601
+  max_epochs:
+    TRAINING: 601
+  wandb_logging_during_training: False
