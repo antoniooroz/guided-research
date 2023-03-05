@@ -281,7 +281,7 @@ class GPN(Model):
             Phase.TRAINING: self.get_optimizer(self.configuration.training.learning_rate[Phase.TRAINING], self.configuration.training.reg_lambda[Phase.TRAINING])
         }
     
-    def step(self, phase: Phase, data: Data) -> Results:
+    def step(self, phase: Phase, data: Data, loss_balance_weights=None) -> Results:
         is_training = phase in Phase.training_phases()
         self.set_eval(not is_training)
         if is_training:

@@ -36,7 +36,7 @@ experiment:
   active_learning_update_interval: 200
   active_learning_budget_per_update: 1
   active_learning_budget: 14
-  active_learning_starting_class: [0]
+  active_learning_starting_class: [0, 1]
   active_learning_selector: UNCERTAINTY
   active_learning_selector_network_mode: ISOLATED
   active_learning_selector_uncertainty_mode: ALEATORIC
