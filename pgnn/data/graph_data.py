@@ -119,21 +119,29 @@ class GraphData:
         plt.clf()
         
     def get_split(self, seed):
-        if self.experiment_configuration.dataset == Dataset.GENERATED_SBM_AL:
+        if self.experiment_configuration.dataset in [Dataset.GENERATED_SBM_AL, Dataset.GENERATED_SBM_AL2]:
+            if self.experiment_configuration.dataset == Dataset.GENERATED_SBM_AL:
+                N = 4
+            elif self.experiment_configuration.dataset == Dataset.GENERATED_SBM_AL2:
+                N = 1+self.experiment_configuration.sbm_al2_uninformative_layers
+            else:
+                raise NotImplementedError()
+            
             node_types = self.graph.node_names.astype('int64')
             
             split_ratio = []
             for c in range(self.experiment_configuration.num_classes):
                 class_split_ratio = []
-                for t in range(4):
-                    class_split_ratio.append(self.experiment_configuration.sbm_classes[4*c + t])
+                for t in range(N):
+                    class_split_ratio.append(self.experiment_configuration.sbm_classes[N*c + t])
                 nodes_in_class = sum(class_split_ratio)
-                for t in range(4):
+                for t in range(N):
                     class_split_ratio[t] = class_split_ratio[t] / nodes_in_class
                 split_ratio.append(class_split_ratio)
         else:
             node_types = None
             split_ratio = None
+            N = None
         
         idx_all = gen_splits(
             labels=self.graph.labels.astype('int64'), 
@@ -146,7 +154,8 @@ class GraphData:
             test=self.experiment_configuration.seeds.experiment_mode==ExperimentMode.TEST,
             node_types = node_types,
             training_type=self.experiment_configuration.training_type,
-            split_ratio=split_ratio
+            split_ratio=split_ratio,
+            n_types_per_class=N
         )
         return idx_all
         
@@ -518,9 +527,20 @@ class ActiveLearning:
                 budget_per_class = budget_for_update
                 
                 labels_training = labels_all_numpy[graph_data.idx_all[Phase.TRAINING].cpu()]
+                
+                if np.isscalar(labels_training):
+                    labels_training = np.array([labels_training])
+                
+                # also regard labels which are not in set
+                labels_training = np.concatenate([
+                    labels_training, 
+                    np.arange(graph_data.configuration.experiment.num_classes)
+                ], axis=0)
+                
                 labels_training_unique, labels_training_counts = np.unique(labels_training, return_counts=True)
                 
                 label_classes_range = [labels_training_unique[labels_training_counts.argmin()]]
+                print(label_classes_range)
             else:
                 budget_per_class = budget_for_update // labels_all_numpy.max().item()+1
                 
@@ -535,7 +555,7 @@ class ActiveLearning:
                 for t in graph_data.experiment_configuration.active_learning_training_type:
                     select += (labels == c) * (types == t)
                 
-                assert select.sum() > budget_per_class
+                assert select.sum() >= budget_per_class
                 
                 make_important_indeces = np.flip(select.argsort())
                 importance[make_important_indeces[:budget_per_class]] = 1.0

@@ -148,10 +148,11 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                         training_phase=training_phase
                     )
                     
-                    loss_balance_weights = balanced_weights(
-                        n_classes=graph_data.nclasses, 
-                        labels=graph_data.labels_all[Phase.TRAINING]
-                    )
+                    if configuration.training.balanced_loss:
+                        loss_balance_weights = balanced_weights(
+                            n_classes=graph_data.nclasses, 
+                            labels=graph_data.labels_all[Phase.TRAINING]
+                        )
                     
                     resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_in = active_learning_update_logs['mean_l2_distance_in']
                     resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_out = active_learning_update_logs['mean_l2_distance_out']

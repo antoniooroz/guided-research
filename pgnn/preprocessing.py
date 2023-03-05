@@ -39,7 +39,7 @@ def known_unknown_split(
 
 def train_stopping_split(
         idx: np.ndarray, labels: np.ndarray, ntrain_per_class: int = 20, node_types=None, training_type=None,
-        nstopping: int = 500, seed: int = 2413340114, split_ratio=None) -> Tuple[np.ndarray, np.ndarray]:
+        nstopping: int = 500, seed: int = 2413340114, split_ratio=None, n_types_per_class=None) -> Tuple[np.ndarray, np.ndarray]:
     rnd_state = np.random.RandomState(seed)
     
     train_idx_split = []
@@ -60,7 +60,7 @@ def train_stopping_split(
             class_idx = idx[labels == c]
             class_types = node_types[labels == c]
             
-            for t in range(4):
+            for t in range(n_types_per_class):
                 ntrain_per_type = int(round(split_ratio[c][t] * ntrain_per_class,0))
                 assert isclose(ntrain_per_class * split_ratio[c][t], ntrain_per_type)
     
@@ -83,7 +83,7 @@ def train_stopping_split(
 
 def gen_splits(
         labels: np.ndarray, idx_split_args: Dict[str, int],
-        test: bool = False, node_types=None, training_type=None, split_ratio=None) -> Dict[Phase, torch.LongTensor]:
+        test: bool = False, node_types=None, training_type=None, split_ratio=None, n_types_per_class=None) -> Dict[Phase, torch.LongTensor]:
     all_idx = np.arange(len(labels))
     known_idx, unknown_idx = known_unknown_split(
             all_idx, idx_split_args['nknown'], node_types)
@@ -96,6 +96,7 @@ def gen_splits(
             node_types=node_types[known_idx] if node_types is not None else None, 
             training_type=training_type,
             split_ratio=split_ratio,
+            n_types_per_class=n_types_per_class,
             **stopping_split_args)
     if test:
         val_idx = unknown_idx
