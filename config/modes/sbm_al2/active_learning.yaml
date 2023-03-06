@@ -1,10 +1,10 @@
 custom_name: classification
-tags: ['active_learning_sbm_al2_v1']
+tags: ['active_learning_sbm_al2_v3']
 
 experiment:
   seeds:
     end: 1
-  iterations_per_seed: 5
+  iterations_per_seed: 20
 
   dataset: GENERATED_SBM_AL2
   datapoints_training_per_class: 205
