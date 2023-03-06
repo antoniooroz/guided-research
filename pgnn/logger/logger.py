@@ -151,9 +151,7 @@ class LogStep():
         self.step = step
         self.results = results.to_dict(prefix=self.log_prefix)
         
-        self.results = {k: v for k, v in self.results.items() if 
-                        'PROPAGATED' in k and ('mean/' in k or 'std/' in k) and 'VALTEST' in k
-        }
+        self.results = {k: v for k, v in self.results.items() if 'PROPAGATED' in k and 'VALTEST' in k}
         
         if self.configuration.training.wandb_logging_during_training:
             # TODO: Maybe add weights
