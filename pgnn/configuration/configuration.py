@@ -12,7 +12,7 @@ class Configuration(BaseConfiguration):
         self.tags: list[str] = None
         self.debug: bool = False
         self.wandb_entity: str = 'tum_daml_ba_antoniooroz'
-        self.wandb_project: str = 'Guided Research'
+        self.wandb_project: str = 'GR2'
         self.load: str = None
         
         self.training: TrainingConfiguration = TrainingConfiguration()
