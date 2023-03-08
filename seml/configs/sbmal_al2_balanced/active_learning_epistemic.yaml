@@ -24,7 +24,6 @@ grid:
     options:
       - ["models/sbm/mcd_ppnp"]
       - ["models/sbm/mcd_gcn"]
-      - ["models/gpn_16"]
   config.2:
     type: choice
     options:
