@@ -1,0 +1,45 @@
+seml:
+  executable: run.py
+  name: Active_Learning
+  output_dir: seml/logs
+  project_root_dir: ../../..
+
+slurm:
+  experiments_per_job: 1
+  max_simultaneous_jobs: 4  # Restrict number of simultaneously running jobs per job array
+  sbatch_options:
+    gres: gpu:1       # num GPUs
+    mem: 16G          # memory
+    cpus-per-task: 2  # num cores
+    time: 2-00:00     # max time, D-HH:MM
+
+###### BEGIN PARAMETER CONFIGURATION ######
+
+fixed:
+  overrides.tags: ['active_learning_sbmal2_balanced_v1']
+
+grid:
+  config.1:
+    type: choice
+    options:
+      - ["models/sbm/mcd_ppnp"]
+      - ["models/sbm/mcd_gcn"]
+      - ["models/sbm/ppnp"]
+      - ["models/sbm/gcn"]
+      - ["models/sbm/mlp"]
+  config.2:
+    type: choice
+    options:
+      - ["modes/sbm_al2/active_learning_balanced"]
+  config.3:
+    type: choice
+    options:
+      - ["active_learning/fixed_general"]
+  overrides.experiment.active_learning_training_type:
+    type: choice
+    options:
+      - [0]
+      - [1]
+      - [2]
+      - [3]
+      - [4]

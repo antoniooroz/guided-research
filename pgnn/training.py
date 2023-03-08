@@ -77,7 +77,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
     if configuration.training.balanced_loss:
         loss_balance_weights = balanced_weights(
             n_classes=graph_data.nclasses, 
-            labels=graph_data.labels_all[Phase.TRAINING]
+            labels=graph_data.labels_all[graph_data.idx_all[Phase.TRAINING]]
         )
     else:
         loss_balance_weights = None
@@ -151,7 +151,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                     if configuration.training.balanced_loss:
                         loss_balance_weights = balanced_weights(
                             n_classes=graph_data.nclasses, 
-                            labels=graph_data.labels_all[Phase.TRAINING]
+                            labels=graph_data.labels_all[graph_data.idx_all[Phase.TRAINING]]
                         )
                     
                     resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_in = active_learning_update_logs['mean_l2_distance_in']
