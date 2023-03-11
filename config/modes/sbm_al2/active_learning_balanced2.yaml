@@ -5,10 +5,10 @@ experiment:
   seeds:
     start: 10
     end: 20
-  iterations_per_seed: 5
+  iterations_per_seed: 3
 
   dataset: GENERATED_SBM_AL2
-  datapoints_training_per_class: 205
+  datapoints_training_per_class: 255
   datapoints_stopping: 300
   datapoints_known: 4000
   num_classes: 7

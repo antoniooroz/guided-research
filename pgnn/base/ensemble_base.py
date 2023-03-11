@@ -1,6 +1,7 @@
 import os
 from pgnn.base import Base
 import torch
+import torch.nn as nn
 from pgnn.base.network_mode import NetworkMode
 
 from pgnn.configuration.configuration import Configuration
@@ -22,7 +23,7 @@ class ENSEMBLE_Base(Base):
         self.nfeatures = nfeatures
         self.nclasses = nclasses
         self.configuration = configuration
-        self.models: list[Base] = []
+        self.models: list[Base] = nn.ModuleList()
         
         assert configuration.model.samples_training == configuration.model.samples_prediction, "For ensembles, number of training samples and prediction sampels needs to be the same"
     
@@ -42,7 +43,7 @@ class ENSEMBLE_Base(Base):
         for i in range(nsamples):
             output_per_mode = self.models[i].forward(model_input)
             for key in model_output_samples.keys():
-                model_output_samples[key].append(output_per_mode[key].unsqueeze(0))
+                model_output_samples[key].append(output_per_mode[key])
         
         # Accumulate samples and calculate outputs
         for key in model_output_samples.keys():
