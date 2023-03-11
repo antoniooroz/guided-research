@@ -2,5 +2,6 @@ custom_name: debug
 debug: True
 experiment:
   seeds:
+    start: 0
     end: 2
   iterations_per_seed: 1

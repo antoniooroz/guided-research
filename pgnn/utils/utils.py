@@ -133,11 +133,11 @@ def escape_slashes(val):
     
 def balanced_weights(n_classes, labels):
     classes, counts = torch.unique(labels, return_counts=True)
-    average_per_class = labels.shape[0]/classes.shape[0]
+    average_per_class = labels.shape[0]
     
     weight_for_existing_classes = average_per_class/counts
     
     all_weights = torch.zeros(n_classes).to(labels.device)
     all_weights[classes] = weight_for_existing_classes
     
-    return all_weights
+    return (all_weights / all_weights.sum()) * classes.shape[0]

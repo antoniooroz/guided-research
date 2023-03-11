@@ -55,15 +55,18 @@ class ModelType(Enum):
     P_PPNP = 'P_PPNP'
     MIXED_PPNP = 'P_PPNP'
     MCD_PPNP = 'MCD_PPNP'
+    ENSEMBLE_PPNP = 'ENSEMBLE_PPNP'
     
     GCN = 'GCN'
     P_GCN = 'P_GCN'
     MIXED_GCN = 'P_GCN'
     MCD_GCN = 'MCD_GCN'
+    ENSEMBLE_GCN = 'ENSEMBLE_GCN'
     DE_GCN = 'MCD_GCN'
     
     GAT = 'GAT'
     MCD_GAT = 'MCD_GAT'
+    ENSEMBLE_GAT = 'ENSEMBLE_GAT'
     P_GAT = 'P_GAT'
     P_ATT_GAT = 'P_GAT'
     P_PROJ_GAT = 'P_GAT'

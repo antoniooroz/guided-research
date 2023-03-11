@@ -12,18 +12,18 @@ experiment:
   datapoints_stopping: 300
   datapoints_known: 4000
   num_classes: 7
-  sbm_al2_uninformative_layers: 4
+  sbm_al2_uninformative_layers: 5
   sbm_classes: [
-      20, 200, 200, 200, 200,
-      20, 200, 200, 200, 200,
-      20, 200, 200, 200, 200,
-      20, 200, 200, 200, 200,
-      20, 200, 200, 200, 200,
-      20, 200, 200, 200, 200,
-      20, 200, 200, 200, 200,
+      20, 200, 200, 200, 200, 200,
+      20, 200, 200, 200, 200, 200,
+      20, 200, 200, 200, 200, 200,
+      20, 200, 200, 200, 200, 200,
+      20, 200, 200, 200, 200, 200,
+      20, 200, 200, 200, 200, 200,
+      20, 200, 200, 200, 200, 200,
     ]
-  sbm_connection_probabilities_id_in_cluster: 0.01
-  sbm_connection_probabilities_id_out_cluster: 0.0025
+  sbm_connection_probabilities_id_in_cluster: 0.05
+  sbm_connection_probabilities_id_out_cluster: 0.005
   
   sbm_nfeatures: 10
   sbm_feature_mean: 0
