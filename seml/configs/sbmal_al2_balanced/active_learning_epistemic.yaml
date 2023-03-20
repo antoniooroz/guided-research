@@ -15,15 +15,14 @@ slurm:
 
 ###### BEGIN PARAMETER CONFIGURATION ######
 
-fixed:
-  overrides.tags: ['active_learning_sbmal2_balanced_v4']
-
 grid:
   config.1:
     type: choice
     options:
       - ["models/sbm/mcd_ppnp"]
       - ["models/sbm/mcd_gcn"]
+      - ["models/sbm/ensemble_gcn"]
+      - ["models/sbm/ensemble_ppnp"]
   config.2:
     type: choice
     options:

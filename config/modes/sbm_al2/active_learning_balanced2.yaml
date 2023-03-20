@@ -1,5 +1,5 @@
 custom_name: classification
-tags: ['active_learning_sbm_al2_v3']
+tags: ['active_learning_sbm_balanced_val0_al2_v0']
 
 experiment:
   seeds:
@@ -8,21 +8,22 @@ experiment:
   iterations_per_seed: 3
 
   dataset: GENERATED_SBM_AL2
-  datapoints_training_per_class: 255
+  valtest_type: [0]
+  datapoints_training_per_class: 260
   datapoints_stopping: 300
   datapoints_known: 4000
   num_classes: 7
   sbm_al2_uninformative_layers: 5
   sbm_classes: [
-      20, 200, 200, 200, 200, 200,
-      20, 200, 200, 200, 200, 200,
-      20, 200, 200, 200, 200, 200,
-      20, 200, 200, 200, 200, 200,
-      20, 200, 200, 200, 200, 200,
-      20, 200, 200, 200, 200, 200,
-      20, 200, 200, 200, 200, 200,
+      40, 200, 200, 200, 200, 200,
+      40, 200, 200, 200, 200, 200,
+      40, 200, 200, 200, 200, 200,
+      40, 200, 200, 200, 200, 200,
+      40, 200, 200, 200, 200, 200,
+      40, 200, 200, 200, 200, 200,
+      40, 200, 200, 200, 200, 200,
     ]
-  sbm_connection_probabilities_id_in_cluster: 0.05
+  sbm_connection_probabilities_id_in_cluster: 0.01
   sbm_connection_probabilities_id_out_cluster: 0.005
   
   sbm_nfeatures: 10

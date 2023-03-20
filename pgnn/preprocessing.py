@@ -83,7 +83,7 @@ def train_stopping_split(
 
 def gen_splits(
         labels: np.ndarray, idx_split_args: Dict[str, int],
-        test: bool = False, node_types=None, training_type=None, split_ratio=None, n_types_per_class=None) -> Dict[Phase, torch.LongTensor]:
+        test: bool = False, node_types=None, training_type=None, split_ratio=None, n_types_per_class=None, valtest_type=None) -> Dict[Phase, torch.LongTensor]:
     all_idx = np.arange(len(labels))
     known_idx, unknown_idx = known_unknown_split(
             all_idx, idx_split_args['nknown'], node_types)
@@ -102,6 +102,13 @@ def gen_splits(
         val_idx = unknown_idx
     else:
         val_idx = exclude_idx(known_idx, [train_idx, stopping_idx])
+        
+    if valtest_type is not None:
+        selector = np.zeros(val_idx.shape, dtype=np.bool)
+        for t in valtest_type:
+            selector += (node_types[val_idx] == t)
+        val_idx = val_idx[selector]
+        assert np.unique(labels[val_idx]).shape[0] == np.unique(labels).shape[0]
         
     return {
         Phase.TRAINING: torch.LongTensor(train_idx).to(get_device()),

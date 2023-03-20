@@ -35,6 +35,7 @@ class ExperimentConfiguration(BaseConfiguration):
         
         self.training_type = None
         self.active_learning_training_type = None
+        self.valtest_type: list[int] = None
         
         self.active_learning: bool = False
         self.active_learning_retrain: bool = False

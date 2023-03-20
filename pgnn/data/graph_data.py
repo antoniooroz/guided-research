@@ -154,6 +154,7 @@ class GraphData:
             test=self.experiment_configuration.seeds.experiment_mode==ExperimentMode.TEST,
             node_types = node_types,
             training_type=self.experiment_configuration.training_type,
+            valtest_type=self.experiment_configuration.valtest_type,
             split_ratio=split_ratio,
             n_types_per_class=N
         )
