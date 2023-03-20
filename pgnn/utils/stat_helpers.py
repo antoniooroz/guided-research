@@ -1,3 +1,4 @@
+from math import sqrt
 import numpy as np
 import wandb
 import statistics
@@ -9,7 +10,7 @@ def get_stats_for_column(table, column_name, logging_prefix):
     iters = table.get_column("iteration", convert_to="numpy")
     seeds = table.get_column("seed", convert_to="numpy")
 
-    mean, standard_deviation = _calculate_mean_and_standard_deviation(column_data)
+    mean, standard_deviation, err = _calculate_mean_and_standard_deviation(column_data)
     
     if column_data.dtype != 'object':
         max_idx = np.argmax(column_data)
@@ -21,6 +22,7 @@ def get_stats_for_column(table, column_name, logging_prefix):
     return {
         "mean/" + logging_prefix: mean,
         "std/" + logging_prefix: standard_deviation,
+        "err/" + logging_prefix: err,
         "name_max/" + logging_prefix: str(iters[max_idx]) + '_' + str(seeds[max_idx]),
         "max/" + logging_prefix: column_data[max_idx],
         "name_min/" + logging_prefix: str(iters[min_idx]) + '_' + str(seeds[min_idx]),
@@ -87,9 +89,10 @@ def ood_final_stats(prefix, stats):
     logs = {}
     for key in stats[0].keys():
         values = list(map(lambda x: x[key], stats))
-        mean, standard_deviation = _calculate_mean_and_standard_deviation(values)
+        mean, standard_deviation, err = _calculate_mean_and_standard_deviation(values)
         logs["ood/final_"+prefix+"_"+key] = mean
         logs["ood/final_"+prefix+"_"+key+"_std"] = standard_deviation
+        logs["ood/final_"+prefix+"_"+key+"_err"] = err
     return logs
 
 def _calculate_mean_and_standard_deviation(values):
@@ -97,8 +100,9 @@ def _calculate_mean_and_standard_deviation(values):
         values = torch.FloatTensor(values)
         mean = values.mean()
         standard_deviation = torch.sqrt(torch.sum(torch.square(values - mean)) / (values.shape[0]-1))
+        err = standard_deviation / sqrt(values.shape[0])
         
-        return mean.item(), standard_deviation.item()
+        return mean.item(), standard_deviation.item(), err.item()
     else:
-        return None, None
+        return None, None, None
     
