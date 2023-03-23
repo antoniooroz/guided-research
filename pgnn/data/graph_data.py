@@ -86,6 +86,8 @@ class GraphData:
             self.graph = SBM_AL().init_graph(self, seed)
         elif self.experiment_configuration.dataset == Dataset.GENERATED_SBM_AL2:
             self.graph = SBM_AL2().init_graph(self, seed)
+        elif self.experiment_configuration.dataset == Dataset.GENERATED_SBM_AL3:
+            self.graph = SBM_AL3().init_graph(self, seed)
             
         assert self.experiment_configuration.num_classes == max(self.graph.labels)+1
         
@@ -119,10 +121,10 @@ class GraphData:
         plt.clf()
         
     def get_split(self, seed):
-        if self.experiment_configuration.dataset in [Dataset.GENERATED_SBM_AL, Dataset.GENERATED_SBM_AL2]:
+        if self.experiment_configuration.dataset in [Dataset.GENERATED_SBM_AL, Dataset.GENERATED_SBM_AL2, Dataset.GENERATED_SBM_AL3]:
             if self.experiment_configuration.dataset == Dataset.GENERATED_SBM_AL:
                 N = 4
-            elif self.experiment_configuration.dataset == Dataset.GENERATED_SBM_AL2:
+            elif self.experiment_configuration.dataset in [Dataset.GENERATED_SBM_AL2, Dataset.GENERATED_SBM_AL3]:
                 N = 1+self.experiment_configuration.sbm_al2_uninformative_layers
             else:
                 raise NotImplementedError()
@@ -434,6 +436,60 @@ class SBM_AL2(SBM_AL):
             else:
                 variance = graph_data.experiment_configuration.sbm_feature_sampling_variance
             
+            samples = sp.stats.multivariate_normal(
+                mean=mean,
+                cov=np.diag([variance] * mean.shape[0]),
+                seed=seed
+            ).rvs(size=nsamples)
+            
+            features.append(samples)
+            labels.extend([c//LAYERS_PER_CLASS] * nsamples)
+            types.extend([c%LAYERS_PER_CLASS] * nsamples)
+            
+        features = np.concatenate(features)
+        labels = np.asarray(labels)
+        types = np.asarray(types)
+            
+        graph_data.log_feature_distances(means)
+            
+        return features, labels, types
+    
+class SBM_AL3(SBM_AL2):
+    def features(self, graph_data: GraphData, seed):
+        UNINFORMATIVE_LAYERS = graph_data.experiment_configuration.sbm_al2_uninformative_layers
+        LAYERS_PER_CLASS = 1 + UNINFORMATIVE_LAYERS
+        CLASSES = len(graph_data.experiment_configuration.sbm_classes)//LAYERS_PER_CLASS
+        
+        features = []
+        labels = []
+        types = []
+        
+        random_state = seed
+        
+        means = []
+        
+        for _ in range(CLASSES):
+            means.append(sp.stats.norm.rvs(
+                loc=graph_data.experiment_configuration.sbm_feature_mean, 
+                scale=graph_data.experiment_configuration.sbm_feature_variance,
+                size=graph_data.experiment_configuration.sbm_nfeatures, 
+                random_state=random_state
+            ))
+            random_state += 10
+            
+        means_summed = np.sum(np.concatenate([np.expand_dims(m, axis=0) for m in means], axis=0), axis=0)
+        
+        for c, nsamples in enumerate(graph_data.experiment_configuration.sbm_classes):
+            is_informed = c%LAYERS_PER_CLASS==0 
+            mean = means[c//LAYERS_PER_CLASS]
+            
+            variance = graph_data.experiment_configuration.sbm_feature_sampling_variance_informed
+            self_weight = graph_data.experiment_configuration.sbm_al3_uninformed_self_weight
+            
+            if not is_informed:
+                means_without_self = (means_summed-mean) / (CLASSES-1)
+                mean = self_weight*mean + (1-self_weight)*means_without_self
+                
             samples = sp.stats.multivariate_normal(
                 mean=mean,
                 cov=np.diag([variance] * mean.shape[0]),

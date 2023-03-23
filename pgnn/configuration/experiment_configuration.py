@@ -32,6 +32,7 @@ class ExperimentConfiguration(BaseConfiguration):
         self.sbm_connection_probabilities_ood_out_cluster = 0.001
         
         self.sbm_al2_uninformative_layers = 3
+        self.sbm_al3_uninformed_self_weight = 0.5
         
         self.training_type = None
         self.active_learning_training_type = None
@@ -79,6 +80,7 @@ class Dataset(Enum):
     GENERATED_SBM = 'generated_sbm'
     GENERATED_SBM_AL = 'generated_sbm_al'
     GENERATED_SBM_AL2 = 'generated_sbm_al2'
+    GENERATED_SBM_AL3 = 'generated_sbm_al3'
     CORA_ML = 'cora_ml'
     CITESEER = 'citeseer'
 
