@@ -1,5 +1,5 @@
 custom_name: classification
-tags: ['active_learning_sbm_unbalanced_val0_al2.1_v0']
+tags: ['active_learning_sbm_unbalanced_val0_al2.1_v1t']
 
 experiment:
   seeds:
@@ -52,5 +52,5 @@ training:
     TRAINING: 3200
   max_epochs:
     TRAINING: 3200
-  wandb_logging_during_training: False
+  wandb_logging_during_training: True
   balanced_loss: False
