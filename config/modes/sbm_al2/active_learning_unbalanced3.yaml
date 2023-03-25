@@ -1,5 +1,5 @@
 custom_name: classification
-tags: ['active_learning_sbm_unbalanced_val0_al2.1_v2t']
+tags: ['active_learning_sbm_unbalanced_val0_al2.1_v3t']
 
 experiment:
   seeds:
@@ -54,3 +54,4 @@ training:
     TRAINING: 3200
   wandb_logging_during_training: False
   balanced_loss: False
+  early_stopping_variable: ACCURACY
