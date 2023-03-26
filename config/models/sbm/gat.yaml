@@ -1,5 +1,10 @@
 model:
-  type: GCN
+  type: GAT
+  hidden_layer_size:
+    - 8
+  gat_hidden_layers_heads:
+    - 8
+  gat_skip_connections: False
 training:
   learning_rate: 
     TRAINING: 0.03

@@ -1,0 +1,46 @@
+model:
+  type: GPN
+  gpn_model:
+    # change this to a get a different split and random model initialization at the same time
+    seed: 42
+    
+    # change this to a get a different random model initialization (init_no > 0)
+    init_no: 1
+    
+    model_name: GPN
+    dim_hidden: 16
+    dropout_prob: 0.25
+    K: 10
+    add_self_loops: true
+    maf_layers: 0
+    gaussian_layers: 0
+    use_batched_flow: true
+    loss_reduction: sum
+    approximate_reg: true
+    flow_weight_decay: 0.0
+    pre_train_mode: flow
+    alpha_evidence_scale: latent-new
+    alpha_teleport: 0.1
+    entropy_reg: 0.00001
+    dim_latent: 8
+    radial_layers: 4
+training:
+  phases:
+    - WARMUP
+    - TRAINING
+  learning_rate:
+    WARMUP: 0.002
+    TRAINING: 0.002
+  reg_lambda: 
+    WARMUP: 0.0
+    TRAINING: 0.0
+  drop_prob: 0
+  max_epochs: 
+    WARMUP: 20
+    TRAINING: 1000
+  early_stopping:
+    WARMUP: True
+    TRAINING: True
+  patience:
+    WARMUP: 100
+    TRAINING: 100
