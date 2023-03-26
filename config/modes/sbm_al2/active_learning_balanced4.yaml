@@ -1,10 +1,10 @@
 custom_name: classification
-tags: ['active_learning_sbm_balanced_val0_al2.2_v4']
+tags: ['active_learning_sbm_balanced_val0_al2.2_v5']
 
 experiment:
   seeds:
     start: 0
-    end: 1
+    end: 20
   iterations_per_seed: 5
 
   dataset: GENERATED_SBM_AL2
@@ -54,4 +54,4 @@ training:
     TRAINING: 3200
   wandb_logging_during_training: False
   balanced_loss: True
-  early_stopping_variable: ACCURACY
+  early_stopping_variable: LOSS
