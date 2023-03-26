@@ -1,5 +1,5 @@
 custom_name: classification
-tags: ['active_learning_sbm_balanced_val0_al2.2_v0']
+tags: ['active_learning_sbm_balanced_val0_al2.2_v1']
 
 experiment:
   seeds:
@@ -8,7 +8,7 @@ experiment:
   iterations_per_seed: 5
 
   dataset: GENERATED_SBM_AL2
-  valtest_type: [0]
+  valtest_type: null
   datapoints_training_per_class: 300
   datapoints_stopping: 300
   datapoints_known: 4000
@@ -42,7 +42,7 @@ experiment:
   active_learning_selector: UNCERTAINTY
   active_learning_selector_network_mode: ISOLATED
   active_learning_selector_uncertainty_mode: ALEATORIC
-  active_learning_l2_distance_logging: True
+  active_learning_l2_distance_logging: False
 
   ood: NONE
   

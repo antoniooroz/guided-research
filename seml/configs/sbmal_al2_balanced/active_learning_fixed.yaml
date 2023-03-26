@@ -22,7 +22,7 @@ grid:
       #- ["models/sbm/mcd_ppnp"]
       #- ["models/sbm/mcd_gcn"]
       - ["models/sbm/ppnp"]
-      - ["models/sbm/gcn"]
+      #- ["models/sbm/gcn"]
       #- ["models/sbm/mlp"]
       #- ["models/sbm/ensemble_gcn"]
       #- ["models/sbm/ensemble_ppnp"]

@@ -181,7 +181,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
         runtime_perepoch = runtime / (epoch + 1)
         
         # Save best model
-        model.save_model()
+        # model.save_model()
         
         pbar.close()
     else:
