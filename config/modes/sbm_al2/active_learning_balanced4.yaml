@@ -1,5 +1,5 @@
 custom_name: classification
-tags: ['active_learning_sbm_balanced_val0_al2.2_v7']
+tags: ['active_learning_sbm_balanced_val0_al2.2_v8']
 
 experiment:
   seeds:
@@ -8,7 +8,7 @@ experiment:
   iterations_per_seed: 5
 
   dataset: GENERATED_SBM_AL2
-  valtest_type: null
+  valtest_type: [0]
   datapoints_training_per_class: 300
   datapoints_stopping: 300
   datapoints_known: 4000
