@@ -1,5 +1,5 @@
 custom_name: classification
-tags: ['active_learning_sbm_balanced_val0_al2.2_v5']
+tags: ['active_learning_sbm_balanced_val0_al2.2_v7']
 
 experiment:
   seeds:
