@@ -183,7 +183,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
         runtime = time.time() - start_time
         runtime_perepoch = runtime / (epoch + 1)
         
-        # Save best model
+        # Save best model - Deactivated because of space
         # model.save_model()
         
         pbar.close()
