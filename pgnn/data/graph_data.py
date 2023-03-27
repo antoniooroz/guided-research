@@ -697,7 +697,7 @@ class ActiveLearning:
             enabled=graph_data.configuration.training.early_stopping[training_phase],
             patience=graph_data.configuration.training.patience[training_phase],
             max_epochs=graph_data.configuration.training.max_epochs[training_phase],
-            reset_best=True,
+            reset_best=True
         )
         
         if graph_data.configuration.experiment.active_learning_retrain:

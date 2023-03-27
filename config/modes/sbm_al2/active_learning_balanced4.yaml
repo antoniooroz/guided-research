@@ -4,7 +4,7 @@ tags: ['active_learning_sbm_balanced_val0_al2.2_v8']
 experiment:
   seeds:
     start: 0
-    end: 3
+    end: 5
   iterations_per_seed: 5
 
   dataset: GENERATED_SBM_AL2

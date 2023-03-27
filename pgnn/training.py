@@ -132,7 +132,25 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                     
                     resultsPerPhase[phase] = results
 
-                    
+                ########################################################################
+                # Logging                                                              #
+                ########################################################################
+                logger.logStep(
+                    results=resultsPerPhase,
+                    weights=model.log_weights()
+                )
+                
+                pbar.set_postfix({'stopping acc': '{:.3f}'.format(resultsPerPhase[Phase.STOPPING].networkModeResults[NetworkMode.PROPAGATED].accuracy)})
+                ########################################################################
+                # Early Stopping                                                       #
+                ########################################################################
+                if early_stopping.check_stop(resultsPerPhase[Phase.STOPPING].networkModeResults[NetworkMode.PROPAGATED], epoch):
+                    break
+                
+                ########################################################################
+                # Active Learning                                                      #
+                ########################################################################
+                
                 if training_phase == Phase.TRAINING and configuration.experiment.active_learning and active_learning.should_update(epoch=epoch, loss=resultsPerPhase[Phase.TRAINING].networkModeResults[NetworkMode.PROPAGATED].loss):
                     early_stopping.load_best()
                     
@@ -157,21 +175,6 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                     resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_in = active_learning_update_logs['mean_l2_distance_in']
                     resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_out = active_learning_update_logs['mean_l2_distance_out']
                     resultsPerPhase[Phase.ACTIVE_LEARNING].info.active_learning_added_nodes = active_learning_update_logs['added_nodes']
-
-                ########################################################################
-                # Logging                                                              #
-                ########################################################################
-                logger.logStep(
-                    results=resultsPerPhase,
-                    weights=model.log_weights()
-                )
-                
-                pbar.set_postfix({'stopping acc': '{:.3f}'.format(resultsPerPhase[Phase.STOPPING].networkModeResults[NetworkMode.PROPAGATED].accuracy)})
-                ########################################################################
-                # Early Stopping                                                       #
-                ########################################################################
-                if early_stopping.check_stop(resultsPerPhase[Phase.STOPPING].networkModeResults[NetworkMode.PROPAGATED], epoch):
-                    break           
                     
             # Load best model parameters from era
             early_stopping.load_best()

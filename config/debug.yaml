@@ -5,3 +5,5 @@ experiment:
     start: 0
     end: 2
   iterations_per_seed: 1
+training:
+  wandb_logging_during_training: True
