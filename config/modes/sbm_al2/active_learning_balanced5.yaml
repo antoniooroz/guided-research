@@ -1,5 +1,5 @@
-custom_name: sbmal_2.4_unbalanced_val[0]_v0
-tags: ['sbmal_2.4_unbalanced_val[0]_v0']
+custom_name: sbmal_2.4_balanced_val[0]_v0
+tags: ['sbmal_2.4_balanced_val[0]_v0']
 
 experiment:
   seeds:
@@ -53,5 +53,5 @@ training:
   max_epochs:
     TRAINING: 2400
   wandb_logging_during_training: False
-  balanced_loss: False
+  balanced_loss: True
   early_stopping_variable: LOSS
