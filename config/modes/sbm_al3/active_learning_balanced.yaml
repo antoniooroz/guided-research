@@ -30,7 +30,7 @@ experiment:
   sbm_feature_mean: 0
   sbm_feature_variance: 1
   sbm_feature_sampling_variance_informed: 0.1
-  sbm_al3_uninformed_self_weight: 0.143 # ca. 1.5/7
+  sbm_al3_uninformed_self_weight: 1.5
 
   active_learning: True
   active_learning_retrain: True

@@ -284,7 +284,7 @@ class SBM:
             samples = sp.stats.multivariate_normal(
                 mean=mean,
                 cov=np.diag(np.abs(sp.stats.norm.rvs(loc=graph_data.experiment_configuration.sbm_feature_sampling_variance, scale=1, size=graph_data.experiment_configuration.sbm_nfeatures, random_state=random_state+1))),
-                seed=seed
+                seed=random_state
             ).rvs(size=nsamples)
             
             random_state += 10
@@ -361,8 +361,9 @@ class SBM_AL(SBM):
             samples = sp.stats.multivariate_normal(
                 mean=mean,
                 cov=np.diag([variance] * mean.shape[0]),
-                seed=seed
+                seed=random_state
             ).rvs(size=nsamples)
+            random_state += 10
             
             features.append(samples)
             labels.extend([c//4] * nsamples)
@@ -447,8 +448,9 @@ class SBM_AL2(SBM_AL):
             samples = sp.stats.multivariate_normal(
                 mean=mean,
                 cov=np.diag([variance] * mean.shape[0]),
-                seed=seed
+                seed=random_state
             ).rvs(size=nsamples)
+            random_state+=10
             
             features.append(samples)
             labels.extend([c//LAYERS_PER_CLASS] * nsamples)
@@ -485,17 +487,29 @@ class SBM_AL3(SBM_AL2):
             ))
             random_state += 10
             
-        means_summed = np.sum(np.concatenate([np.expand_dims(m, axis=0) for m in means], axis=0), axis=0)
+        mean_matrix = np.concatenate([np.expand_dims(m, axis=0) for m in means], axis=0)
         
         for c, nsamples in enumerate(graph_data.experiment_configuration.sbm_classes):
             is_informed = c%LAYERS_PER_CLASS==0 
             mean = means[c//LAYERS_PER_CLASS]
             
             variance = graph_data.experiment_configuration.sbm_feature_sampling_variance_informed
-            self_weight = graph_data.experiment_configuration.sbm_al3_uninformed_self_weight
+            self_weight = graph_data.experiment_configuration.sbm_al3_uninformed_self_weight/CLASSES
             
             if not is_informed:
-                means_without_self = (means_summed-mean) / (CLASSES-1)
+                mean_weights = np.abs(sp.stats.norm.rvs(
+                    loc=0, 
+                    scale=1,
+                    size=CLASSES, 
+                    random_state=random_state
+                ))
+                random_state+=10
+                
+                mean_weights[c//LAYERS_PER_CLASS] = 0
+                
+                mean_weights = mean_weights / mean_weights.sum()
+                means_without_self = mean_weights@mean_matrix
+                
                 mean = self_weight*mean + (1-self_weight)*means_without_self
                 
             samples = sp.stats.multivariate_normal(
