@@ -1,0 +1,57 @@
+custom_name: sbmal_2.4_balanced_val[0]_v0
+tags: ['sbmal_2.4_balanced_val[0]_v0']
+
+experiment:
+  seeds:
+    start: 0
+    end: 4
+  iterations_per_seed: 3
+
+  dataset: GENERATED_SBM_AL2
+  valtest_type: [0]
+  datapoints_training_per_class: 140
+  datapoints_stopping: 150
+  datapoints_known: 1500
+  num_classes: 7
+  sbm_al2_uninformative_layers: 5
+  sbm_classes: [
+      60, 100, 100, 100, 100, 100,
+      60, 100, 100, 100, 100, 100,
+      60, 100, 100, 100, 100, 100,
+      60, 100, 100, 100, 100, 100,
+      60, 100, 100, 100, 100, 100,
+      60, 100, 100, 100, 100, 100,
+      60, 100, 100, 100, 100, 100,
+    ]
+  sbm_connection_probabilities_id_in_cluster: 0.02
+  sbm_connection_probabilities_id_out_cluster: 0.01
+  
+  sbm_nfeatures: 10
+  sbm_feature_mean: 0
+  sbm_feature_variance: 1
+  sbm_feature_sampling_variance: 30
+  sbm_feature_sampling_variance_informed: 0.1
+
+  active_learning: True
+  active_learning_retrain: True
+  active_learning_start_cap_per_class: 1
+  active_learning_update_interval: 150
+  active_learning_budget_per_update: 1
+  active_learning_budget: 14
+  active_learning_starting_class: [0, 1]
+  active_learning_selector: UNCERTAINTY
+  active_learning_selector_network_mode: ISOLATED
+  active_learning_selector_uncertainty_mode: ALEATORIC
+  active_learning_l2_distance_logging: False
+
+  ood: NONE
+  
+training:
+  ood_eval_during_training: False
+  patience: 
+    TRAINING: 2400
+  max_epochs:
+    TRAINING: 2400
+  wandb_logging_during_training: False
+  balanced_loss: True
+  early_stopping_variable: LOSS
