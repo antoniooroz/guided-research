@@ -1,5 +1,5 @@
-custom_name: sbmal_2.4_balanced_val[0]_v1
-tags: ['sbmal_2.4_balanced_val[0]_v1']
+custom_name: sbmal_2.4_balanced_val[0]_v2
+tags: ['sbmal_2.4_balanced_val[0]_v2']
 
 experiment:
   seeds:
@@ -11,7 +11,7 @@ experiment:
   valtest_type: [0]
   datapoints_training_per_class: 140
   datapoints_stopping: 150
-  datapoints_known: 1500
+  datapoints_known: 0
   num_classes: 7
   sbm_al2_uninformative_layers: 5
   sbm_classes: [

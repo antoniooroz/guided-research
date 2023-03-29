@@ -145,12 +145,19 @@ class GraphData:
             split_ratio = None
             N = None
         
+        is_sbm = self.experiment_configuration.dataset.name.startswith('GENERATED_SBM')
+        
+        if is_sbm:
+            datapoints_known = self.graph.labels.shape[0]
+        else:
+            datapoints_known = self.experiment_configuration.datapoints_known
+        
         idx_all = gen_splits(
             labels=self.graph.labels.astype('int64'), 
             idx_split_args={
                 'ntrain_per_class': self.experiment_configuration.datapoints_training_per_class,
                 'nstopping': self.experiment_configuration.datapoints_stopping,
-                'nknown': self.experiment_configuration.datapoints_known,
+                'nknown': datapoints_known,
                 'seed': seed
             }, 
             test=self.experiment_configuration.seeds.experiment_mode==ExperimentMode.TEST,
@@ -158,7 +165,8 @@ class GraphData:
             training_type=self.experiment_configuration.training_type,
             valtest_type=self.experiment_configuration.valtest_type,
             split_ratio=split_ratio,
-            n_types_per_class=N
+            n_types_per_class=N,
+            sbm=is_sbm
         )
         return idx_all
         

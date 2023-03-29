@@ -83,7 +83,7 @@ def train_stopping_split(
 
 def gen_splits(
         labels: np.ndarray, idx_split_args: Dict[str, int],
-        test: bool = False, node_types=None, training_type=None, split_ratio=None, n_types_per_class=None, valtest_type=None) -> Dict[Phase, torch.LongTensor]:
+        test: bool = False, node_types=None, training_type=None, split_ratio=None, n_types_per_class=None, valtest_type=None, sbm=False) -> Dict[Phase, torch.LongTensor]:
     all_idx = np.arange(len(labels))
     known_idx, unknown_idx = known_unknown_split(
             all_idx, idx_split_args['nknown'], node_types)
@@ -98,7 +98,7 @@ def gen_splits(
             split_ratio=split_ratio,
             n_types_per_class=n_types_per_class,
             **stopping_split_args)
-    if test:
+    if test and not sbm:
         val_idx = unknown_idx
     else:
         val_idx = exclude_idx(known_idx, [train_idx, stopping_idx])
