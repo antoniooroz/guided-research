@@ -515,8 +515,9 @@ class SBM_AL3(SBM_AL2):
             samples = sp.stats.multivariate_normal(
                 mean=mean,
                 cov=np.diag([variance] * mean.shape[0]),
-                seed=seed
+                seed=random_state
             ).rvs(size=nsamples)
+            random_state+=10
             
             features.append(samples)
             labels.extend([c//LAYERS_PER_CLASS] * nsamples)
