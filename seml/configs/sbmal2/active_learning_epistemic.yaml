@@ -26,7 +26,7 @@ grid:
   config.2:
     type: choice
     options:
-      - ["modes/sbm_al2/active_learning_balanced6"]
+      - ["modes/sbm_al3/active_learning_balanced"]
   config.3:
     type: choice
     options:
