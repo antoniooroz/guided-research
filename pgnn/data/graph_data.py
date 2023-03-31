@@ -1,4 +1,3 @@
-
 from math import sqrt
 from pgnn.base.network_mode import NetworkMode
 from pgnn.configuration.experiment_configuration import ActiveLearningSelector

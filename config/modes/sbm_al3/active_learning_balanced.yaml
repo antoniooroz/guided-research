@@ -1,5 +1,5 @@
-custom_name: sbmal_3_balanced_val[0]_v0
-tags: ['sbmal_3_balanced_val[0]_v0']
+custom_name: sbmal_3_balanced_val[0]_v1
+tags: ['sbmal_3_balanced_val[0]_v1']
 
 experiment:
   seeds:
@@ -30,7 +30,7 @@ experiment:
   sbm_feature_mean: 0
   sbm_feature_variance: 1
   sbm_feature_sampling_variance_informed: 0.5
-  sbm_al3_uninformed_self_weight: 1.2
+  sbm_al3_uninformed_self_weight: 1.5
 
   active_learning: True
   active_learning_retrain: True
