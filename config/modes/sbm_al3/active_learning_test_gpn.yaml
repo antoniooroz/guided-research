@@ -35,10 +35,9 @@ experiment:
   active_learning: True
   active_learning_retrain: True
   active_learning_start_cap_per_class: 1
-  active_learning_update_interval: 150
   active_learning_budget_per_update: 700
   active_learning_budget: 700
-  active_learning_starting_class: [0, 1]
+  active_learning_starting_class: [0, 1, 2, 3, 4, 5, 6]
   active_learning_selector: UNCERTAINTY
   active_learning_selector_network_mode: ISOLATED
   active_learning_selector_uncertainty_mode: ALEATORIC
@@ -49,9 +48,9 @@ experiment:
 training:
   ood_eval_during_training: False
   patience: 
-    TRAINING: 2400
+    TRAINING: 200
   max_epochs:
-    TRAINING: 2400
+    TRAINING: 200
   wandb_logging_during_training: False
   balanced_loss: True
   early_stopping_variable: LOSS

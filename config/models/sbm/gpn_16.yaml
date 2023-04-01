@@ -37,10 +37,10 @@ training:
   drop_prob: 0
   max_epochs: 
     WARMUP: 20
-    TRAINING: 2400
+    TRAINING: 200
   early_stopping:
     WARMUP: True
     TRAINING: True
   patience:
     WARMUP: 100
-    TRAINING: 2400
+    TRAINING: 200
