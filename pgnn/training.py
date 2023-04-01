@@ -15,7 +15,8 @@ from pgnn.base.network_mode import NetworkMode
 from pgnn.configuration.configuration import Configuration
 from pgnn.configuration.experiment_configuration import OOD, ExperimentMode
 from pgnn.configuration.training_configuration import Phase
-from pgnn.data.graph_data import ActiveLearning, GraphData
+from pgnn.data.graph_data import GraphData
+from pgnn.data.active_learning import ActiveLearning
 from pgnn.logger import Logger
 import tqdm
 from pgnn.data import Data, ModelInput
