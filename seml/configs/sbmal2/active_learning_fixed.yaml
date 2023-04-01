@@ -6,11 +6,11 @@ seml:
 
 slurm:
   experiments_per_job: 1
-  max_simultaneous_jobs: 8  # Restrict number of simultaneously running jobs per job array
+  max_simultaneous_jobs: 4 # Restrict number of simultaneously running jobs per job array
   sbatch_options:
     gres: gpu:1       # num GPUs
     mem: 16G          # memory
-    cpus-per-task: 4  # num cores
+    cpus-per-task: 2  # num cores
     time: 2-00:00     # max time, D-HH:MM
 
 ###### BEGIN PARAMETER CONFIGURATION ######
