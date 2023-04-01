@@ -15,6 +15,7 @@ import os
 from pgnn.configuration.training_configuration import Phase
 from pgnn.data.data import Data
 from pgnn.data.model_input import ModelInput
+from math import ceil
 
 from pgnn.result.result import Results
 
@@ -141,3 +142,7 @@ def balanced_weights(n_classes, labels):
     all_weights[classes] = weight_for_existing_classes
     
     return (all_weights / all_weights.sum()) * classes.shape[0]
+
+def get_active_learning_cycles(configuration):
+    cycles = ceil(configuration.experiment.active_learning_budget/configuration.experiment.active_learning_budget_per_update)+1
+    return cycles

@@ -30,7 +30,10 @@ class EarlyStopping:
         self.stop_variable = stop_variable
         self.best = SavedState()
         self.first = SavedState(state_dict=self.model.custom_state_dict(), value=0, epoch=0)
-        
+    
+    def reset_best(self):
+        self.best = SavedState()
+    
     def init_for_training_phase(self, enabled: bool = True, patience: int = 100, max_epochs: int = 1000, reset_best = False):
         self.enabled = enabled
         self.patience = patience
@@ -38,8 +41,7 @@ class EarlyStopping:
         self.max_epochs = max_epochs
         
         if reset_best:
-            self.best = SavedState()
-            
+            self.reset_best()
         
     def check_stop(self, result: NetworkModeResult, epoch: int):
         if not self.enabled:

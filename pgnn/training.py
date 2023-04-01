@@ -23,7 +23,7 @@ from pgnn.data import Data, ModelInput
 from pgnn.result.result import Info, Results
 
 import pgnn.models as models
-from pgnn.utils.utils import matrix_to_torch, balanced_weights
+from pgnn.utils.utils import get_active_learning_cycles, matrix_to_torch, balanced_weights
 
 from .data.sparsegraph import SparseGraph
 from .preprocessing import gen_seeds
@@ -40,7 +40,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
     # Torch Seed and Logging
     logging.log(21, f"Training Model: {configuration.model.type.name}")
     logging.log(22, f"Seed: {seed}")
-    logging.log(22, f"Seed-Iteration: {iteration}")
+    logging.log(22, f"Seed-Iteration: {iteration+1}/{configuration.experiment.iterations_per_seed}")
     torch_seed = gen_seeds()
     torch.manual_seed(seed=torch_seed) # TODO: Maybe make reproducible aswell
     logging.log(22, f"PyTorch seed: {torch_seed}")
@@ -85,104 +85,89 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
     # Training
     start_time = time.time()
     if not configuration.training.skip_training:
-        for training_phase in Phase.training_phases():
-            if training_phase not in configuration.training.phases:
-                continue
-            pbar = tqdm.tqdm(range(configuration.training.max_epochs[training_phase]))
+        cycles = get_active_learning_cycles(configuration) if configuration.experiment.active_learning else 1
+        
+        for cycle in range(cycles):
+            logging.log(22, f'Cycle: {cycle+1}/{cycles}')
+            for training_phase in Phase.training_phases():
+                if training_phase not in configuration.training.phases:
+                    continue
+                
+                pbar = tqdm.tqdm(range(configuration.training.max_epochs[training_phase]))
 
-            early_stopping.init_for_training_phase(
-                enabled=configuration.training.early_stopping[training_phase],
-                patience=configuration.training.patience[training_phase],
-                max_epochs=configuration.training.max_epochs[training_phase]
-            )
-            
-            for epoch in pbar:
-                resultsPerPhase: dict[Phase, Results] = {}
-                for phase in Phase.get_phases(training_phase, active_learning=configuration.experiment.active_learning):
-                    start_time_phase = time.time()
-                    results = Results()
-                    
-                    number_of_nodes = 0
-                    
-                    dataloader_phase = Phase.TRAINING if phase in Phase.training_phases() else phase
-                    ########################################################################
-                    # Training Step                                                        #
-                    ########################################################################
-                    for idx, labels, oods in graph_data.dataloaders[dataloader_phase]:
-                        data = Data(
-                            model_input=ModelInput(features=graph_data.feature_matrix, indices=idx.to(device)),
-                            labels=labels.to(device),
-                            ood_indicators=oods.to(device)
-                        )
-                        
-                        results += model.step(
-                            phase=phase if epoch > 0 else Phase.INIT, 
-                            data=data,
-                            loss_balance_weights=loss_balance_weights
-                        )
-                        number_of_nodes += idx.shape[0]
-                        
-                    
-                    results.info = Info(
-                        duration=time.time() - start_time_phase,
-                        seed=seed,
-                        iteration=iteration,
-                        number_of_nodes=number_of_nodes
-                    )
-                    
-                    resultsPerPhase[phase] = results
-
-                ########################################################################
-                # Logging                                                              #
-                ########################################################################
-                logger.logStep(
-                    results=resultsPerPhase,
-                    weights=model.log_weights()
+                early_stopping.init_for_training_phase(
+                    enabled=configuration.training.early_stopping[training_phase],
+                    patience=configuration.training.patience[training_phase],
+                    max_epochs=configuration.training.max_epochs[training_phase]
                 )
                 
-                pbar.set_postfix({'stopping acc': '{:.3f}'.format(resultsPerPhase[Phase.STOPPING].networkModeResults[NetworkMode.PROPAGATED].accuracy)})
-                ########################################################################
-                # Early Stopping                                                       #
-                ########################################################################
-                if early_stopping.check_stop(resultsPerPhase[Phase.STOPPING].networkModeResults[NetworkMode.PROPAGATED], epoch):
-                    break
-                
-                ########################################################################
-                # Active Learning                                                      #
-                ########################################################################
-                
-                if training_phase == Phase.TRAINING and configuration.experiment.active_learning and active_learning.should_update(epoch=epoch, loss=resultsPerPhase[Phase.TRAINING].networkModeResults[NetworkMode.PROPAGATED].loss):
-                    early_stopping.load_best()
+                for epoch in pbar:
+                    resultsPerPhase: dict[Phase, Results] = {}
                     
-                    activeLearningResults = final_run(model, graph_data.feature_matrix, graph_data.idx_all, graph_data.labels_all, graph_data.oods_all)
-                    logger.logActiveLearning(resultsPerPhase=activeLearningResults, step=epoch)
-                    
-                    active_learning_update_logs = active_learning.update(
-                        graph_data=graph_data,
-                        active_learning_results=resultsPerPhase[Phase.ACTIVE_LEARNING],
-                        epoch=epoch, 
-                        loss=resultsPerPhase[Phase.TRAINING].networkModeResults[NetworkMode.PROPAGATED].loss,
-                        early_stopping=early_stopping,
-                        training_phase=training_phase
+                    for phase in Phase.get_phases(training_phase, active_learning=configuration.experiment.active_learning):
+                        start_time_phase = time.time()
+                        results = Results()
+                        
+                        number_of_nodes = 0
+                        
+                        dataloader_phase = Phase.TRAINING if phase in Phase.training_phases() else phase
+                        
+                        ########################################################################
+                        # Training Step                                                        #
+                        ########################################################################
+                        for idx, labels, oods in graph_data.dataloaders[dataloader_phase]:
+                            data = Data(
+                                model_input=ModelInput(features=graph_data.feature_matrix, indices=idx.to(device)),
+                                labels=labels.to(device),
+                                ood_indicators=oods.to(device)
+                            )
+                            
+                            results += model.step(
+                                phase=phase if epoch > 0 else Phase.INIT, 
+                                data=data,
+                                loss_balance_weights=loss_balance_weights
+                            )
+                            number_of_nodes += idx.shape[0]
+                            
+                        
+                        results.info = Info(
+                            duration=time.time() - start_time_phase,
+                            seed=seed,
+                            iteration=iteration,
+                            number_of_nodes=number_of_nodes
+                        )
+                        
+                        resultsPerPhase[phase] = results
+
+                    ########################################################################
+                    # Logging                                                              #
+                    ########################################################################
+                    logger.logStep(
+                        results=resultsPerPhase,
+                        weights=model.log_weights()
                     )
                     
-                    if configuration.training.balanced_loss:
-                        loss_balance_weights = balanced_weights(
-                            n_classes=graph_data.nclasses, 
-                            labels=graph_data.labels_all[graph_data.idx_all[Phase.TRAINING]]
-                        )
+                    pbar.set_postfix({'stopping acc': '{:.3f}'.format(resultsPerPhase[Phase.STOPPING].networkModeResults[NetworkMode.PROPAGATED].accuracy)})
+                    ########################################################################
+                    # Early Stopping                                                       #
+                    ########################################################################
+                    if early_stopping.check_stop(resultsPerPhase[Phase.STOPPING].networkModeResults[NetworkMode.PROPAGATED], epoch):
+                        break
+                
+                early_stopping.load_best()
                     
-                    resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_in = active_learning_update_logs['mean_l2_distance_in']
-                    resultsPerPhase[Phase.ACTIVE_LEARNING].info.mean_l2_distance_out = active_learning_update_logs['mean_l2_distance_out']
-                    resultsPerPhase[Phase.ACTIVE_LEARNING].info.active_learning_added_nodes = active_learning_update_logs['added_nodes']
-                    
-            # Load best model parameters from era
-            early_stopping.load_best()
-            early_stopping.set_first()
-
+            loss_balance_weights = active_learning.step(
+                graph_data=graph_data,
+                early_stopping=early_stopping,
+                logger=logger,
+                model=model,
+                cycle=cycle
+            )
+            
         runtime = time.time() - start_time
         runtime_perepoch = runtime / (epoch + 1)
         
+        early_stopping.load_best()
         # Save best model - Deactivated because of space
         # model.save_model()
         

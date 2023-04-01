@@ -19,7 +19,7 @@ import torch
 from pgnn.configuration import Dataset, ExperimentMode, ExperimentConfiguration, Configuration, OOD
 from pgnn.result.result import Results
 
-from pgnn.utils.utils import get_device, matrix_to_torch
+from pgnn.utils.utils import get_device, matrix_to_torch, final_run, balanced_weights
 
 
 class GraphData:
@@ -560,10 +560,6 @@ class ActiveLearning:
     def __init__(self, configuration: Configuration):
         self.configuration = configuration
         
-        self.dynamic_update = self.configuration.experiment.active_learning_dynamic_update
-        self.dynamic_update_patience = self.configuration.experiment.active_learning_dynamic_update_patience
-        self.update_interval = self.configuration.experiment.active_learning_update_interval
-        
         self.budget = self.configuration.experiment.active_learning_budget
         self.budget_per_update = self.configuration.experiment.active_learning_budget_per_update
         
@@ -684,28 +680,43 @@ class ActiveLearning:
         l2_distances = l2_distances.min(dim=-1).values
         
         return l2_distances
-            
-    def should_update(self, epoch: int = 0, loss: float = 0):
-        if self.budget == 0:
-            return False
+    
+    def step(self, graph_data, early_stopping, logger, model, cycle):
+        if not self.configuration.experiment.active_learning or self.budget == 0:
+            return
         
-        if self.dynamic_update:
-            if self.saved_loss is None or loss < self.saved_loss:
-                self.saved_loss = loss
-                self.saved_epoch = epoch 
-                return False
-            elif epoch-self.saved_epoch >= self.dynamic_update_patience:
-                self.saved_loss = None
-                self.saved_epoch = 0
-                return True
-            else:
-                return False
-        elif epoch >= self.update_interval and epoch%self.update_interval==0:
-            return True
+        early_stopping.load_best()
+        
+        activeLearningResults = final_run(model, graph_data.feature_matrix, graph_data.idx_all, graph_data.labels_all, graph_data.oods_all)
+        
+        active_learning_update_logs = self.update(
+            graph_data=graph_data,
+            active_learning_results=activeLearningResults[Phase.ACTIVE_LEARNING],
+            early_stopping=early_stopping
+        )
+        
+        activeLearningResults[Phase.ACTIVE_LEARNING].info.mean_l2_distance_in = active_learning_update_logs['mean_l2_distance_in']
+        activeLearningResults[Phase.ACTIVE_LEARNING].info.mean_l2_distance_out = active_learning_update_logs['mean_l2_distance_out']
+        activeLearningResults[Phase.ACTIVE_LEARNING].info.active_learning_added_nodes = active_learning_update_logs['added_nodes']
+        logger.logActiveLearning(resultsPerPhase=activeLearningResults, step=cycle)
+        
+        # Early Stopping
+        early_stopping.reset_best()
+        if graph_data.configuration.experiment.active_learning_retrain:
+            early_stopping.load_first()
+        
+        # Balanced loss
+        if self.configuration.training.balanced_loss:
+            loss_balance_weights = balanced_weights(
+                n_classes=graph_data.nclasses, 
+                labels=graph_data.labels_all[graph_data.idx_all[Phase.TRAINING]]
+            )
         else:
-            return False
+            loss_balance_weights = None
             
-    def update(self, graph_data: GraphData, active_learning_results: Results, epoch: int = 0, loss: float = 0, early_stopping = None, training_phase = None):            
+        return loss_balance_weights
+            
+    def update(self, graph_data: GraphData, active_learning_results: Results, early_stopping = None):            
         idx_new_training, idx_new_active_learning, mean_l2_distance_in, mean_l2_distance_out = self.select(graph_data=graph_data, active_learning_results=active_learning_results)
         
         graph_data.idx_all[Phase.TRAINING] = torch.cat([graph_data.idx_all[Phase.TRAINING], idx_new_training]).to(idx_new_training.device)
@@ -714,16 +725,6 @@ class ActiveLearning:
         graph_data.init_dataloaders()
         
         self.budget = max(0, self.budget - self.budget_per_update)
-        
-        early_stopping.init_for_training_phase(
-            enabled=graph_data.configuration.training.early_stopping[training_phase],
-            patience=graph_data.configuration.training.patience[training_phase],
-            max_epochs=graph_data.configuration.training.max_epochs[training_phase],
-            reset_best=True
-        )
-        
-        if graph_data.configuration.experiment.active_learning_retrain:
-            early_stopping.load_first()
         
         return {
             'mean_l2_distance_in': mean_l2_distance_in,

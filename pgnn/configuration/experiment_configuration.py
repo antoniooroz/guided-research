@@ -40,9 +40,6 @@ class ExperimentConfiguration(BaseConfiguration):
         
         self.active_learning: bool = False
         self.active_learning_retrain: bool = False
-        self.active_learning_dynamic_update: bool = False
-        self.active_learning_dynamic_update_patience: int = 20
-        self.active_learning_update_interval: int = 0
         self.active_learning_start_cap_per_class: int = 20
         self.active_learning_budget: int = 50
         self.active_learning_budget_per_update: int = 10

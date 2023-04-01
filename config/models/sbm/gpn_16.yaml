@@ -8,8 +8,8 @@ model:
     init_no: 1
     
     model_name: GPN
-    dim_hidden: 64
-    dropout_prob: 0.25
+    dim_hidden: 32
+    dropout_prob: 0.0
     K: 10
     add_self_loops: true
     maf_layers: 0
@@ -21,19 +21,19 @@ model:
     pre_train_mode: flow
     alpha_evidence_scale: latent-new
     alpha_teleport: 0.1
-    entropy_reg: 0.0001
+    entropy_reg: 0.0
     dim_latent: 16
-    radial_layers: 10
+    radial_layers: 5
 training:
   phases:
     - WARMUP
     - TRAINING
   learning_rate:
-    WARMUP: 0.0005
-    TRAINING: 0.0005
+    WARMUP: 0.05
+    TRAINING: 0.05
   reg_lambda: 
-    WARMUP: 0.0001
-    TRAINING: 0.0001
+    WARMUP: 0.0
+    TRAINING: 0.0
   drop_prob: 0
   max_epochs: 
     WARMUP: 20
