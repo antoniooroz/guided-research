@@ -98,23 +98,27 @@ def gen_splits(
             split_ratio=split_ratio,
             n_types_per_class=n_types_per_class,
             **stopping_split_args)
+    
     if test and not sbm:
         val_idx = unknown_idx
     else:
         val_idx = exclude_idx(known_idx, [train_idx, stopping_idx])
-        
+    
+    idx_all = {
+        Phase.TRAINING: torch.LongTensor(train_idx).to(get_device()),
+        Phase.STOPPING: torch.LongTensor(stopping_idx).to(get_device()),
+        Phase.VALTEST: torch.LongTensor(val_idx).to(get_device())
+    } 
+    
     if valtest_type is not None:
         selector = np.zeros(val_idx.shape, dtype=np.bool)
         for t in valtest_type:
             selector += (node_types[val_idx] == t)
-        val_idx = val_idx[selector]
-        assert np.unique(labels[val_idx]).shape[0] == np.unique(labels).shape[0]
+        val_idx_filtered = val_idx[selector]
+        idx_all[Phase.VALTEST_FOR_TYPE] = torch.LongTensor(val_idx_filtered).to(get_device())
+        assert np.unique(labels[val_idx_filtered]).shape[0] == np.unique(labels).shape[0]
         
-    return {
-        Phase.TRAINING: torch.LongTensor(train_idx).to(get_device()),
-        Phase.STOPPING: torch.LongTensor(stopping_idx).to(get_device()),
-        Phase.VALTEST: torch.LongTensor(val_idx).to(get_device())
-    }   
+    return idx_all
 
 def normalize_attributes(attr_matrix):
     epsilon = 1e-12

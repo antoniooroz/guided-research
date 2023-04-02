@@ -97,6 +97,7 @@ class LogIteration():
             Phase.TRAINING: [],
             Phase.STOPPING: [],
             Phase.VALTEST: [],
+            Phase.VALTEST_FOR_TYPE: [],
             Phase.ACTIVE_LEARNING: []
         }
         
@@ -104,6 +105,7 @@ class LogIteration():
             Phase.TRAINING: None,
             Phase.STOPPING: None,
             Phase.VALTEST: None,
+            Phase.VALTEST_FOR_TYPE: None,
             Phase.ACTIVE_LEARNING: None
         }
         

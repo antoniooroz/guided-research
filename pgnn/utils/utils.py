@@ -87,7 +87,11 @@ def final_run(model, attr_matrix, idx_dict, labels, oods) -> dict[Phase, Results
     for phase, idx in idx_dict.items():
         idx = idx.to(attr_matrix.device)
         data = Data(
-            model_input=ModelInput(features=attr_matrix, indices=idx),
+            model_input=ModelInput(
+                features=attr_matrix, 
+                indices=idx,
+                training_labels=labels[idx_dict[Phase.TRAINING]]
+            ),
             labels=labels.to(attr_matrix.device)[idx],
             ood_indicators=oods.to(attr_matrix.device)[idx]
         )

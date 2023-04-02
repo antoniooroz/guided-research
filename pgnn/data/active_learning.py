@@ -78,6 +78,7 @@ class ActiveLearning:
             assert budget_for_update % (labels_all_numpy.max()+1) == 0 or budget_for_update == 1
             
             if budget_for_update == 1:
+                # Take class with least samples
                 budget_per_class = budget_for_update
                 
                 labels_training = labels_all_numpy[graph_data.idx_all[Phase.TRAINING].cpu()]
@@ -96,6 +97,7 @@ class ActiveLearning:
                 label_classes_range = [labels_training_unique[labels_training_counts.argmin()]]
                 print(label_classes_range)
             else:
+                # Take equal amount of nodes for each class
                 budget_per_class = budget_for_update // labels_all_numpy.max().item()+1
                 
                 label_classes_range = range(labels_all_numpy.max()+1)

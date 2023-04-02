@@ -41,7 +41,7 @@ import copy
 class GPN(Model):
     """Graph Posterior Network model"""
 
-    def __init__(self, nfeatures, nclasses, configuration: Configuration, adj_matrix, training_labels, **kwargs):
+    def __init__(self, nfeatures, nclasses, configuration: Configuration, adj_matrix, **kwargs):
         configuration.model.gpn_model['dim_features'] = nfeatures
         configuration.model.gpn_model['num_classes'] = nclasses
         super().__init__(ModelConfiguration(**configuration.model.gpn_model))
@@ -87,7 +87,6 @@ class GPN(Model):
             normalization='sym')
         
         self.edge_indices, self.edge_weights = get_edge_indices(adj_matrix)
-        self.training_labels = training_labels
         self.configuration: Configuration = configuration
 
         assert self.params.pre_train_mode in ('encoder', 'flow', None)
@@ -103,7 +102,10 @@ class GPN(Model):
 
         # compute feature evidence (with Normalizing Flows)
         # log p(z, c) = log p(z | c) p(c)
-        p_c = self.get_class_probabilities(model_input.features, model_input.indices)
+        p_c = self.get_class_probabilities(
+            attr_matrix=model_input.features, 
+            training_labels=model_input.training_labels
+        )
         log_q_ft_per_class = self.flow(z) + p_c.view(1, -1).log()
 
         if '-plus-classes' in self.params.alpha_evidence_scale:
@@ -244,9 +246,9 @@ class GPN(Model):
     def likelihood(self, model_output: GPNModelOutput, data: Data) -> Dict[str, torch.Tensor]:
         raise NotImplementedError
 
-    def get_class_probabilities(self, attr_matrix: torch.sparse.FloatTensor, idx: torch.LongTensor) -> torch.Tensor:
+    def get_class_probabilities(self, attr_matrix: torch.sparse.FloatTensor, training_labels) -> torch.Tensor:
         l_c = torch.zeros(self.params.num_classes, device=attr_matrix.device)
-        y_train = self.training_labels
+        y_train = training_labels
 
         # calculate class_counts L(c)
         for c in range(self.params.num_classes):
@@ -291,7 +293,8 @@ class GPN(Model):
         id_data = Data(
             model_input=ModelInput(
                 features=data.model_input.features,
-                indices=data.model_input.indices[data.ood_indicators==0]
+                indices=data.model_input.indices[data.ood_indicators==0],
+                training_labels=data.model_input.training_labels
             ),
             labels=data.labels[data.ood_indicators==0]
         )

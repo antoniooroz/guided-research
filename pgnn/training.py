@@ -105,7 +105,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                 for epoch in pbar:
                     resultsPerPhase: dict[Phase, Results] = {}
                     
-                    for phase in Phase.get_phases(training_phase, active_learning=configuration.experiment.active_learning):
+                    for phase in Phase.get_phases(training_phase):
                         start_time_phase = time.time()
                         results = Results()
                         
@@ -118,7 +118,11 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
                         ########################################################################
                         for idx, labels, oods in graph_data.dataloaders[dataloader_phase]:
                             data = Data(
-                                model_input=ModelInput(features=graph_data.feature_matrix, indices=idx.to(device)),
+                                model_input=ModelInput(
+                                    features=graph_data.feature_matrix, 
+                                    indices=idx.to(device),
+                                    training_labels=graph_data.labels_all[graph_data.idx_all[Phase.TRAINING]]
+                                ),
                                 labels=labels.to(device),
                                 ood_indicators=oods.to(device)
                             )

@@ -45,11 +45,10 @@ class Phase(Enum):
     STOPPING = 'stopping'
     ACTIVE_LEARNING = 'active_learning'
     VALTEST = 'valtest'
+    VALTEST_FOR_TYPE = 'valtest_for_type'
     
-    def get_phases(training_phase: 'Phase', active_learning=False) -> list['Phase']:
+    def get_phases(training_phase: 'Phase') -> list['Phase']:
         phases = [training_phase, Phase.STOPPING]
-        if active_learning:
-            phases.append(Phase.ACTIVE_LEARNING)
         return phases
     
 class StopVariable(Enum):

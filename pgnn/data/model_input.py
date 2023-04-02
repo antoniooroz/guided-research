@@ -6,3 +6,4 @@ from dataclasses import dataclass
 class ModelInput:
     features: Tensor = None
     indices: Tensor = None
+    training_labels: Tensor = None # GPN
