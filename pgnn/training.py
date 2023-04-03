@@ -175,7 +175,7 @@ def train_model(graph_data: GraphData, seed: int, iteration: int,
         early_stopping.load_best()
         
         # Save best model - Deactivated because of space
-        model.save_model()
+        #model.save_model()
         
         pbar.close()
     else:

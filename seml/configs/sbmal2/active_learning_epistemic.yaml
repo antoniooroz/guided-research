@@ -23,6 +23,7 @@ grid:
       - ["models/sbm/mcd_gcn"]
       - ["models/sbm/ensemble_gcn"]
       - ["models/sbm/ensemble_ppnp"]
+      - ["models/sbm/gpn_16"]
   config.2:
     type: choice
     options:
