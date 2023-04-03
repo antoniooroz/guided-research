@@ -25,4 +25,4 @@ class Configuration(BaseConfiguration):
         from pgnn.utils import get_device
         self.device = get_device()
         
-        
+        self.custom_name += f'|{self.experiment.active_learning_selector}|{self.experiment.active_learning_selector_network_mode}|{self.experiment.active_learning_selector_uncertainty_mode}|{self.experiment.active_learning_training_type}|{self.experiment.active_learning_l2_distance_use_centroids}|{self.experiment.active_learning_starting_class}'
