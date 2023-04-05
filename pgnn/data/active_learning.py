@@ -56,68 +56,20 @@ class ActiveLearning:
         budget_for_update = min(self.budget_per_update, self.budget)
         
         if self.l2_distance_logging or self.selector == ActiveLearningSelector.L2_DISTANCE:
-            l2_distances = self._l2_distances(graph_data)
+            l2_distances = self._selector_l2_distances(graph_data)
         else:
             l2_distances = None
         
         if self.selector == ActiveLearningSelector.RANDOM:
             order = torch.randperm(idx_active_learning.shape[0])
         elif self.selector == ActiveLearningSelector.UNCERTAINTY:
-            resultsForNetworkMode = active_learning_results.networkModeResults[self.network_mode]
-            
-            if self.uncertainty_mode == UncertaintyMode.ALEATORIC: 
-                uncertainties = resultsForNetworkMode._aleatoric_uncertainties
-            else:
-                uncertainties = resultsForNetworkMode._epistemic_uncertainties
-            
-            order = uncertainties.argsort(axis=0)
+            order = self._selector_uncertainty(active_learning_results=active_learning_results)
         elif self.selector == ActiveLearningSelector.FIXED:
-            labels_all_numpy = graph_data.labels_all.cpu().numpy()
-            labels = labels_all_numpy[idx_active_learning.cpu()]
-            
-            assert budget_for_update % (labels_all_numpy.max()+1) == 0 or budget_for_update == 1
-            
-            if budget_for_update == 1:
-                # Take class with least samples
-                budget_per_class = budget_for_update
-                
-                labels_training = labels_all_numpy[graph_data.idx_all[Phase.TRAINING].cpu()]
-                
-                if np.isscalar(labels_training):
-                    labels_training = np.array([labels_training])
-                
-                # also regard labels which are not in set
-                labels_training = np.concatenate([
-                    labels_training, 
-                    np.arange(graph_data.configuration.experiment.num_classes)
-                ], axis=0)
-                
-                labels_training_unique, labels_training_counts = np.unique(labels_training, return_counts=True)
-                
-                label_classes_range = [labels_training_unique[labels_training_counts.argmin()]]
-                print(label_classes_range)
-            else:
-                # Take equal amount of nodes for each class
-                budget_per_class = budget_for_update // labels_all_numpy.max().item()+1
-                
-                label_classes_range = range(labels_all_numpy.max()+1)
-            
-            types = graph_data.types[idx_active_learning.cpu()]
-                
-            importance = np.zeros(idx_active_learning.shape[0])
-            
-            for c in label_classes_range:
-                select = np.zeros(idx_active_learning.shape[0])
-                for t in graph_data.experiment_configuration.active_learning_training_type:
-                    select += (labels == c) * (types == t)
-                
-                assert select.sum() >= budget_per_class
-                
-                make_important_indeces = np.arange(select.shape[0])[select==1]
-                make_important_indeces = np.random.permutation(make_important_indeces)
-                importance[make_important_indeces[:budget_per_class]] = 1.0
-                    
-            order = importance.argsort()
+            order = self._selector_fixed(
+                graph_data=graph_data,
+                idx_active_learning=idx_active_learning,
+                budget_for_update=budget_for_update
+            )
         elif self.selector == ActiveLearningSelector.L2_DISTANCE:
             order = l2_distances.cpu().numpy().argsort(axis=0)
         else:
@@ -138,7 +90,72 @@ class ActiveLearning:
         #      Additional Training Samples      , Leftover Active Learning Samples , mean_l2_distance in, mean_l2_distance_left_out
         return idx_active_learning[split_index:], idx_active_learning[:split_index], mean_l2_distance_in, mean_l2_distance_out
     
-    def _l2_distances(self, graph_data):
+    def _selector_uncertainty(self, active_learning_results: Results):
+        resultsForNetworkMode = active_learning_results.networkModeResults[self.network_mode]
+            
+        if self.uncertainty_mode == UncertaintyMode.ALEATORIC: 
+            uncertainties = resultsForNetworkMode._aleatoric_uncertainties
+        else:
+            uncertainties = resultsForNetworkMode._epistemic_uncertainties
+        
+        return uncertainties.argsort(axis=0)
+    
+    def _selector_fixed_unbalanced(self, graph_data, idx_active_learning, budget_for_update):
+        types = graph_data.types[idx_active_learning.cpu()]
+        select = np.zeros(idx_active_learning.shape[0])
+        for t in graph_data.experiment_configuration.active_learning_training_type:
+            select += (types == t)
+        
+    
+    def _selector_fixed(self, graph_data, idx_active_learning, budget_for_update):
+        labels_all_numpy = graph_data.labels_all.cpu().numpy()
+        labels = labels_all_numpy[idx_active_learning.cpu()]
+        
+        assert budget_for_update % (labels_all_numpy.max()+1) == 0 or budget_for_update == 1
+        
+        if budget_for_update == 1:
+            # Take class with least samples
+            budget_per_class = budget_for_update
+            
+            labels_training = labels_all_numpy[graph_data.idx_all[Phase.TRAINING].cpu()]
+            
+            if np.isscalar(labels_training):
+                labels_training = np.array([labels_training])
+            
+            # also regard labels which are not in set
+            labels_training = np.concatenate([
+                labels_training, 
+                np.arange(graph_data.configuration.experiment.num_classes)
+            ], axis=0)
+            
+            labels_training_unique, labels_training_counts = np.unique(labels_training, return_counts=True)
+            
+            label_classes_range = [labels_training_unique[labels_training_counts.argmin()]]
+            print(label_classes_range)
+        else:
+            # Take equal amount of nodes for each class
+            budget_per_class = budget_for_update // labels_all_numpy.max().item()+1
+            
+            label_classes_range = range(labels_all_numpy.max()+1)
+        
+        types = graph_data.types[idx_active_learning.cpu()]
+            
+        importance = np.zeros(idx_active_learning.shape[0])
+        
+        for c in label_classes_range:
+            select = np.zeros(idx_active_learning.shape[0])
+            for t in graph_data.experiment_configuration.active_learning_training_type:
+                select += (labels == c) * (types == t)
+            
+            assert select.sum() >= budget_per_class
+            
+            make_important_indeces = np.arange(select.shape[0])[select==1]
+            make_important_indeces = np.random.permutation(make_important_indeces)
+            importance[make_important_indeces[:budget_per_class]] = 1.0
+                
+        return importance.argsort()
+    
+    def _selector_l2_distances(self, graph_data):
         training_labels = graph_data.labels_all[graph_data.idx_all[Phase.TRAINING]]
         training_features = graph_data.feature_matrix[graph_data.idx_all[Phase.TRAINING]]
         
