@@ -63,7 +63,16 @@ class ActiveLearning:
         if self.selector == ActiveLearningSelector.RANDOM:
             order = torch.randperm(idx_active_learning.shape[0])
         elif self.selector == ActiveLearningSelector.UNCERTAINTY:
-            order = self._selector_uncertainty(active_learning_results=active_learning_results)
+            order = self._selector_uncertainty(active_learning_results=active_learning_results, invert=False)
+        elif self.selector == ActiveLearningSelector.UNCERTAINTY_INVERTED:
+            order = self._selector_uncertainty(active_learning_results=active_learning_results, invert=True)
+        elif self.selector == ActiveLearningSelector.RANKED:
+            order = self._selector_ranked(active_learning_results=active_learning_results)
+        elif self.selector == ActiveLearningSelector.FIXED_UNBALANCED:
+            order = self._selector_fixed_unbalanced(
+                graph_data=graph_data,
+                idx_active_learning=idx_active_learning
+            )
         elif self.selector == ActiveLearningSelector.FIXED:
             order = self._selector_fixed(
                 graph_data=graph_data,
@@ -90,23 +99,44 @@ class ActiveLearning:
         #      Additional Training Samples      , Leftover Active Learning Samples , mean_l2_distance in, mean_l2_distance_left_out
         return idx_active_learning[split_index:], idx_active_learning[:split_index], mean_l2_distance_in, mean_l2_distance_out
     
-    def _selector_uncertainty(self, active_learning_results: Results):
+    def _selector_uncertainty(self, active_learning_results: Results, invert=False):
         resultsForNetworkMode = active_learning_results.networkModeResults[self.network_mode]
+        
+        inverter = -1 if invert else 1
             
         if self.uncertainty_mode == UncertaintyMode.ALEATORIC: 
-            uncertainties = resultsForNetworkMode._aleatoric_uncertainties
+            uncertainties = resultsForNetworkMode._aleatoric_uncertainties * inverter
         else:
-            uncertainties = resultsForNetworkMode._epistemic_uncertainties
+            uncertainties = resultsForNetworkMode._epistemic_uncertainties * inverter
         
         return uncertainties.argsort(axis=0)
     
-    def _selector_fixed_unbalanced(self, graph_data, idx_active_learning, budget_for_update):
+    def _selector_ranked(self, active_learning_results: Results):
+        resultsForNetworkMode = active_learning_results.networkModeResults[self.network_mode]
+        rank_aleatoric = resultsForNetworkMode._aleatoric_uncertainties.argsort(axis=0).argsort(axis=0)
+        rank_epistemic = resultsForNetworkMode._epistemic_uncertainties.argsort(axis=0).argsort(axis=0)
+        
+        # high epistemic, low aleatoric
+        rank = rank_epistemic - rank_aleatoric
+        
+        return rank.argsort(axis=0)
+        
+    
+    def _selector_fixed_unbalanced(self, graph_data, idx_active_learning):
         types = graph_data.types[idx_active_learning.cpu()]
+        idx = np.arange(idx_active_learning.shape[0])
         select = np.zeros(idx_active_learning.shape[0])
         for t in graph_data.experiment_configuration.active_learning_training_type:
             select += (types == t)
+            
+        idx_for_type = np.random.permutation(idx[select==1])
         
-    
+        if idx_for_type.shape[0] == idx.shape[0]:
+            return idx_for_type
+        else:
+            other_idx = np.random.permutation(idx[select==0])
+            return np.concatenate([other_idx, idx_for_type], axis=0)
+        
     def _selector_fixed(self, graph_data, idx_active_learning, budget_for_update):
         labels_all_numpy = graph_data.labels_all.cpu().numpy()
         labels = labels_all_numpy[idx_active_learning.cpu()]
@@ -134,7 +164,7 @@ class ActiveLearning:
             print(label_classes_range)
         else:
             # Take equal amount of nodes for each class
-            budget_per_class = budget_for_update // labels_all_numpy.max().item()+1
+            budget_per_class = budget_for_update // (labels_all_numpy.max().item()+1)
             
             label_classes_range = range(labels_all_numpy.max()+1)
         

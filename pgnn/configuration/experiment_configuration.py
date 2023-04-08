@@ -135,6 +135,9 @@ class ActiveLearningSelector(Enum):
     UNCERTAINTY = 1
     L2_DISTANCE = 2
     FIXED = 3
+    FIXED_UNBALANCED = 4
+    UNCERTAINTY_INVERTED = 5
+    RANKED = 6
     
 class OODAttributeNormalization(Enum):
     DIV_BY_SUM = 1
