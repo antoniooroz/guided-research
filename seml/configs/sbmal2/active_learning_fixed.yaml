@@ -36,6 +36,7 @@ grid:
     type: choice
     options:
       - ["active_learning/fixed_general"]
+      - ["active_learning/fixed_unbalanced_general"]
   overrides.experiment.active_learning_training_type:
     type: choice
     options:

@@ -19,14 +19,14 @@ grid:
   config.1:
     type: choice
     options:
-      #- ["models/sbm/mcd_ppnp"]
-      #- ["models/sbm/mcd_gcn"]
-      #- ["models/sbm/ppnp"]
-      #- ["models/sbm/gcn"]
-      #- ["models/sbm/mlp"]
-      #- ["models/sbm/gat"]
-      #- ["models/sbm/ensemble_gcn"]
-      #- ["models/sbm/ensemble_ppnp"]
+      - ["models/sbm/mcd_ppnp"]
+      - ["models/sbm/mcd_gcn"]
+      - ["models/sbm/ppnp"]
+      - ["models/sbm/gcn"]
+      - ["models/sbm/mlp"]
+      - ["models/sbm/gat"]
+      - ["models/sbm/ensemble_gcn"]
+      - ["models/sbm/ensemble_ppnp"]
       - ["models/sbm/gpn_16"]
   config.2:
     type: choice
@@ -36,6 +36,7 @@ grid:
     type: choice
     options:
       - ["active_learning/l2_distance"]
-      - ["active_learning/random"]
       - ["active_learning/uncertainty_isolated_aleatoric"]
       - ["active_learning/uncertainty_propagated_aleatoric"]
+      - ["active_learning/uncertainty_isolated_aleatoric_inverted"]
+      - ["active_learning/uncertainty_propagated_aleatoric_inverted"]
