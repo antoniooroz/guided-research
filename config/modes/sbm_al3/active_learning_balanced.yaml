@@ -1,5 +1,5 @@
-custom_name: sbmal_3_balanced_val[0]_v5
-tags: ['sbmal_3_balanced_val[0]_v5']
+custom_name: sbmal_3_balanced_val[0]_v6
+tags: ['sbmal_3_balanced_val[0]_v6']
 
 experiment:
   seeds:
@@ -48,9 +48,9 @@ experiment:
 training:
   ood_eval_during_training: False
   patience: 
-    TRAINING: 200
+    TRAINING: 300
   max_epochs:
-    TRAINING: 200
+    TRAINING: 300
   wandb_logging_during_training: False
   balanced_loss: True
   early_stopping_variable: LOSS
